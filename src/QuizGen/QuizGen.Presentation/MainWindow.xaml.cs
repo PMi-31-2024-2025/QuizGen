@@ -1,31 +1,42 @@
-﻿using QuizGen.BLL;
-using QuizGen.DAL;
-using Microsoft.EntityFrameworkCore;
-using System.Windows;
+using Microsoft.UI.Xaml;
+using Microsoft.Extensions.DependencyInjection;
+using QuizGen.BLL.Services.Interfaces;
+using QuizGen.Presentation.Views;
+using QuizGen.DAL.Extensions;
+using QuizGen.BLL.Extensions;
+using System;
 
-namespace QuizGen.Presentation
+namespace QuizGen.Presentation;
+
+public sealed partial class MainWindow : Window
 {
-    public partial class MainWindow : Window
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IAuthStateService _authStateService;
+
+    public MainWindow(IServiceProvider serviceProvider)
     {
-        private readonly UserService _userService;
+        InitializeComponent();
+        _serviceProvider = serviceProvider;
+        _authStateService = serviceProvider.GetRequiredService<IAuthStateService>();
 
-        public MainWindow()
+        InitializeUser();
+    }
+
+    private void InitializeUser()
+    {
+        if (_authStateService.CurrentUser != null)
         {
-            InitializeComponent();
-
-            // Конфігурація DbContext для прикладу
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseNpgsql("Host=localhost;Database=quizgen;Username=postgres;Password=1111")
-                .Options;
-
-            var context = new AppDbContext(options);
-            _userService = new UserService(context);
+            UserNameText.Text = $"Welcome, {_authStateService.CurrentUser.Name}!";
         }
+    }
 
-        private async void LoadUsers_Click(object sender, RoutedEventArgs e)
-        {
-            var users = await _userService.GetAllUsersAsync();
-            UsersListBox.ItemsSource = users.Select(u => $"{u.Id}: {u.Name}");
-        }
+    private async void LogoutButton_Click(object sender, RoutedEventArgs e)
+    {
+        _authStateService.ClearCurrentUser();
+        await _authStateService.SaveStateAsync();
+
+        var loginWindow = new LoginWindow(_serviceProvider);
+        loginWindow.Activate();
+        Close();
     }
 }

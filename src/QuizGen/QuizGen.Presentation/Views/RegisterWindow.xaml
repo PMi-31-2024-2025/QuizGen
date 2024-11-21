@@ -1,0 +1,19 @@
+<Window
+    x:Class="QuizGen.Presentation.Views.RegisterWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Register - QuizGen">
+
+    <StackPanel Margin="20" Spacing="10">
+        <TextBox x:Name="NameBox" PlaceholderText="Full Name" />
+        <TextBox x:Name="UsernameBox" PlaceholderText="Username" />
+        <PasswordBox x:Name="PasswordBox" PlaceholderText="Password" />
+        <TextBox x:Name="OpenAiKeyBox" PlaceholderText="OpenAI API Key (Optional)" />
+        <CheckBox x:Name="UseLocalModelCheck" Content="Use Local Model" />
+        <Button x:Name="RegisterButton" Click="RegisterButton_Click">Register</Button>
+        <HyperlinkButton x:Name="LoginLink" Click="LoginLink_Click">
+            Already have an account? Login
+        </HyperlinkButton>
+        <TextBlock x:Name="ErrorText" Foreground="Red" TextWrapping="Wrap" />
+    </StackPanel>
+</Window> 

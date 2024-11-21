@@ -1,9 +1,24 @@
-﻿<Window x:Class="QuizGen.Presentation.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="QuizGenApp" Height="450" Width="800">
-    <Grid>
-        <Button Content="Load Users" Width="100" Height="30" Click="LoadUsers_Click"/>
-        <ListBox x:Name="UsersListBox" Width="200" Height="300" VerticalAlignment="Top" Margin="0,50,0,0"/>
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="QuizGen.Presentation.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="QuizGen">
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <TextBlock x:Name="UserNameText" VerticalAlignment="Center"/>
+            <Button x:Name="LogoutButton" Click="LogoutButton_Click">Logout</Button>
+        </StackPanel>
+
+        <TextBlock Grid.Row="1" 
+                   Text="Main content will be here" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center"/>
     </Grid>
 </Window>

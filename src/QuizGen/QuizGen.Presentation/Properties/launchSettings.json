@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "QuizGen.Presentation (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "QuizGen.Presentation (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

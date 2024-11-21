@@ -3,6 +3,9 @@
     name VARCHAR(100),
     username VARCHAR(50) UNIQUE,
     password_hash TEXT,
+    openai_api_key TEXT,
+    ollama_endpoint TEXT DEFAULT 'http://localhost:11434',
+    use_local_model BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
