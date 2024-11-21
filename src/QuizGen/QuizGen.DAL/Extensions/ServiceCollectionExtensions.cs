@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
         
         try
         {
-            dbContext.Database.EnsureDeleted(); // Remove this in production!
+            // dbContext.Database.EnsureDeleted(); // Remove this in production!
             dbContext.Database.EnsureCreated();
         }
         catch (Exception ex)

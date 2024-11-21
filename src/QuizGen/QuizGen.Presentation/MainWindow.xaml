@@ -3,22 +3,28 @@
     x:Class="QuizGen.Presentation.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
     Title="QuizGen">
 
-    <Grid Margin="12">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Grid>
+        <NavigationView x:Name="NavView"
+                       PaneTitle="Menu" 
+                       SelectionChanged="NavigationView_SelectionChanged"
+                       IsBackButtonVisible="Collapsed"
+                       IsBackEnabled="False"
+                       Background="Transparent"
+                       IsPaneToggleButtonVisible="True"
+                       IsSettingsVisible="True">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Icon="Home" Content="Home" Tag="HomePage" />
+                <NavigationViewItem Icon="Add" Content="Create Quiz" Tag="CreateQuizPage" />
+                <NavigationViewItem Icon="Refresh" Content="My Progress" Tag="ProgressPage" />
+                <NavigationViewItem Icon="Document" Content="Reports" Tag="ReportPage" />
+            </NavigationView.MenuItems>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-            <TextBlock x:Name="UserNameText" VerticalAlignment="Center"/>
-            <Button x:Name="LogoutButton" Click="LogoutButton_Click">Logout</Button>
-        </StackPanel>
-
-        <TextBlock Grid.Row="1" 
-                   Text="Main content will be here" 
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"/>
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
     </Grid>
 </Window>

@@ -18,8 +18,10 @@ namespace QuizGen.Presentation
     public partial class App : Application
     {
         private Window m_window;
-        private readonly IServiceProvider _serviceProvider;
+        internal readonly IServiceProvider ServiceProvider;
         private readonly IAuthStateService _authStateService;
+
+        public static Window MainWindow { get; private set; }
 
         public App()
         {
@@ -27,9 +29,9 @@ namespace QuizGen.Presentation
 
             var services = new ServiceCollection();
             ConfigureServices(services);
-            _serviceProvider = services.BuildServiceProvider();
+            ServiceProvider = services.BuildServiceProvider();
             
-            _authStateService = _serviceProvider.GetRequiredService<IAuthStateService>();
+            _authStateService = ServiceProvider.GetRequiredService<IAuthStateService>();
         }
 
         private void ConfigureServices(IServiceCollection services)
@@ -52,13 +54,14 @@ namespace QuizGen.Presentation
 
             if (_authStateService.IsAuthenticated)
             {
-                m_window = new MainWindow(_serviceProvider);
+                m_window = new MainWindow(ServiceProvider);
             }
             else
             {
-                m_window = new LoginWindow(_serviceProvider);
+                m_window = new LoginWindow(ServiceProvider);
             }
 
+            MainWindow = m_window;
             m_window.Activate();
         }
     }
