@@ -8,8 +8,6 @@
         <TextBox x:Name="NameBox" PlaceholderText="Full Name" />
         <TextBox x:Name="UsernameBox" PlaceholderText="Username" />
         <PasswordBox x:Name="PasswordBox" PlaceholderText="Password" />
-        <TextBox x:Name="OpenAiKeyBox" PlaceholderText="OpenAI API Key (Optional)" />
-        <CheckBox x:Name="UseLocalModelCheck" Content="Use Local Model" />
         <Button x:Name="RegisterButton" Click="RegisterButton_Click">Register</Button>
         <HyperlinkButton x:Name="LoginLink" Click="LoginLink_Click">
             Already have an account? Login

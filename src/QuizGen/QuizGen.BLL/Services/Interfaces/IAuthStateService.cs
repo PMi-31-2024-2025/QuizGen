@@ -4,10 +4,10 @@ namespace QuizGen.BLL.Services.Interfaces;
 
 public interface IAuthStateService
 {
-    AuthResult? CurrentUser { get; }
+    StoredCredentials? CurrentCredentials { get; }
     bool IsAuthenticated { get; }
-    void SetCurrentUser(AuthResult user);
-    void ClearCurrentUser();
+    void SetCredentials(StoredCredentials credentials);
+    void ClearCredentials();
     Task LoadSavedStateAsync();
     Task SaveStateAsync();
 } 

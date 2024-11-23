@@ -13,6 +13,9 @@ public sealed partial class SettingsPage : Page
     private readonly IAuthService _authService;
     private readonly IServiceProvider _serviceProvider;
 
+    public string OpenAiKey { get; set; } = string.Empty;
+    public string GptModel { get; set; } = string.Empty;
+
     public SettingsPage()
     {
         InitializeComponent();
@@ -23,65 +26,62 @@ public sealed partial class SettingsPage : Page
         LoadUserSettings();
     }
 
-    private void LoadUserSettings()
+    private async void LoadUserSettings()
     {
-        var user = _authStateService.CurrentUser;
-        if (user != null)
+        if (_authStateService.CurrentCredentials != null)
         {
-            NameBox.Text = user.Name;
-            UsernameBox.Text = user.Username;
-            UseLocalModelSwitch.IsOn = user.UseLocalModel;
-            OpenAiKeyBox.Text = user.OpenAiApiKey ?? string.Empty;
+            var userResult = await _authService.AutoLoginAsync(_authStateService.CurrentCredentials);
+            if (userResult.Success)
+            {
+                var user = userResult.Data;
+                NameBox.Text = user.Name;
+                UsernameBox.Text = user.Username;
+                OpenAiKey = user.OpenAiApiKey ?? string.Empty;
+                OpenAiKeyBox.Password = OpenAiKey;
+                GptModel = user.GptModel;
+                ModelComboBox.SelectedValue = GptModel;
+            }
         }
     }
 
     private async void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        var user = _authStateService.CurrentUser;
-        if (user != null)
+        if (_authStateService.CurrentCredentials != null)
         {
             var result = await _authService.UpdateProfileAsync(
-                user.UserId,
+                _authStateService.CurrentCredentials.UserId,
                 NameBox.Text,
-                OpenAiKeyBox.Text,
-                UseLocalModelSwitch.IsOn
+                OpenAiKeyBox.Password,
+                ModelComboBox.SelectedValue?.ToString() ?? "gpt-4o-mini"
             );
 
             if (result.Success)
             {
-                // Refresh current user data
-                var loginResult = await _authService.LoginAsync(new LoginRequest 
-                { 
-                    Username = user.Username,
-                    Password = "" // We don't need password for refresh
-                });
-
-                if (loginResult.Success)
+                var dialog = new ContentDialog
                 {
-                    _authStateService.SetCurrentUser(loginResult.Data);
-                    await _authStateService.SaveStateAsync();
-
-                    var dialog = new ContentDialog
-                    {
-                        Title = "Settings Saved",
-                        Content = "Your settings have been updated successfully.",
-                        CloseButtonText = "OK",
-                        XamlRoot = this.XamlRoot
-                    };
-                    await dialog.ShowAsync();
-                }
+                    Title = "Success",
+                    Content = "Settings saved successfully",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot
+                };
+                await dialog.ShowAsync();
             }
         }
     }
 
     private async void LogoutButton_Click(object sender, RoutedEventArgs e)
     {
-        _authStateService.ClearCurrentUser();
+        _authStateService.ClearCredentials();
         await _authStateService.SaveStateAsync();
 
         var loginWindow = new LoginWindow(_serviceProvider);
         loginWindow.Activate();
         
-        App.MainWindow?.Close();
+        var mainWindow = App.MainWindow;
+        if (mainWindow != null)
+        {
+            mainWindow.Close();
+            App.MainWindow = loginWindow;
+        }
     }
 }

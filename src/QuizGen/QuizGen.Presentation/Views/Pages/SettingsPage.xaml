@@ -20,32 +20,41 @@
                           Style="{StaticResource SubtitleTextBlockStyle}"
                           Margin="0,0,0,16"/>
 
-                <TextBox x:Name="NameBox" 
-                        Header="Full Name"
-                        Margin="0,0,0,8"/>
-                
-                <TextBox x:Name="UsernameBox"
-                        Header="Username"
-                        IsReadOnly="True"
-                        Margin="0,0,0,8"/>
+                <StackPanel>
+                    <TextBox x:Name="NameBox"
+                            Header="Name"
+                            Margin="0,0,0,8"/>
 
-                <TextBox x:Name="OpenAiKeyBox"
-                        Header="OpenAI API Key"
-                        PlaceholderText="Enter your API key"
-                        Margin="0,0,0,8"/>
+                    <TextBox x:Name="UsernameBox"
+                            Header="Username"
+                            IsReadOnly="True"
+                            Margin="0,0,0,8"/>
 
-                <ToggleSwitch x:Name="UseLocalModelSwitch"
-                             Header="Use Local Model"
-                             Margin="0,8,0,16"/>
+                    <PasswordBox x:Name="OpenAiKeyBox"
+                                Header="OpenAI API Key"
+                                PlaceholderText="Enter your API key"
+                                Password="{x:Bind OpenAiKey, Mode=TwoWay}"
+                                Margin="0,0,0,8"/>
 
-                <Button x:Name="SaveButton" 
-                        Click="SaveButton_Click"
-                        Style="{StaticResource AccentButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;"/>
-                        <TextBlock Text="Save Changes"/>
-                    </StackPanel>
-                </Button>
+                    <ComboBox x:Name="ModelComboBox"
+                              Header="GPT Model"
+                              SelectedValuePath="Tag"
+                              DisplayMemberPath="Content"
+                              SelectedValue="{x:Bind GptModel, Mode=TwoWay}"
+                              Margin="0,0,0,16">
+                        <ComboBoxItem Content="GPT-4o Mini" Tag="gpt-4o-mini"/>
+                        <ComboBoxItem Content="GPT-4o" Tag="gpt-4o"/>
+                    </ComboBox>
+
+                    <Button x:Name="SaveButton" 
+                            Click="SaveButton_Click"
+                            Style="{StaticResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;"/>
+                            <TextBlock Text="Save Changes"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
             </StackPanel>
 
             <!-- Logout Section -->

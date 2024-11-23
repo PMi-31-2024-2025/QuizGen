@@ -10,25 +10,25 @@ namespace QuizGen.BLL.Services
 {
     public class AuthStateService : IAuthStateService
     {
-        private AuthResult _currentUser;
+        private StoredCredentials? _currentCredentials;
         private readonly string _settingsPath;
 
         public AuthStateService(AppConfig config)
         {
-            _settingsPath = Path.Combine(config.LocalSettingsPath, "auth.json");
+            _settingsPath = Path.Combine(config.LocalSettingsPath, "credentials.json");
         }
 
-        public AuthResult CurrentUser => _currentUser;
-        public bool IsAuthenticated => _currentUser != null;
+        public StoredCredentials? CurrentCredentials => _currentCredentials;
+        public bool IsAuthenticated => _currentCredentials != null;
 
-        public void SetCurrentUser(AuthResult user)
+        public void SetCredentials(StoredCredentials credentials)
         {
-            _currentUser = user;
+            _currentCredentials = credentials;
         }
 
-        public void ClearCurrentUser()
+        public void ClearCredentials()
         {
-            _currentUser = null;
+            _currentCredentials = null;
         }
 
         public async Task LoadSavedStateAsync()
@@ -36,7 +36,7 @@ namespace QuizGen.BLL.Services
             if (File.Exists(_settingsPath))
             {
                 var json = await File.ReadAllTextAsync(_settingsPath);
-                _currentUser = JsonSerializer.Deserialize<AuthResult>(json);
+                _currentCredentials = JsonSerializer.Deserialize<StoredCredentials>(json);
             }
         }
 
@@ -46,7 +46,7 @@ namespace QuizGen.BLL.Services
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
-            var json = JsonSerializer.Serialize(_currentUser);
+            var json = JsonSerializer.Serialize(_currentCredentials);
             await File.WriteAllTextAsync(_settingsPath, json);
         }
     }

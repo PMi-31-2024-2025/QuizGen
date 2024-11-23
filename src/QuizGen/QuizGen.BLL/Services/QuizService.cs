@@ -8,27 +8,66 @@ namespace QuizGen.BLL.Services;
 
 public class QuizService : IQuizService
 {
+    private readonly IOpenAiService _openAiService;
     private readonly IQuizRepository _quizRepository;
+    private readonly IQuestionRepository _questionRepository;
+    private readonly IAnswerRepository _answerRepository;
     private readonly IUserRepository _userRepository;
 
-    public QuizService(IQuizRepository quizRepository, IUserRepository userRepository)
+    public QuizService(
+        IOpenAiService openAiService,
+        IQuizRepository quizRepository,
+        IQuestionRepository questionRepository,
+        IAnswerRepository answerRepository,
+        IUserRepository userRepository)
     {
+        _openAiService = openAiService;
         _quizRepository = quizRepository;
+        _questionRepository = questionRepository;
+        _answerRepository = answerRepository;
         _userRepository = userRepository;
     }
 
-    public async Task<ServiceResult<QuizDto>> CreateQuizAsync(int authorId, string prompt, string difficulty, int numQuestions, string[] allowedTypes)
+    public async Task<ServiceResult<QuizDto>> CreateQuizAsync(int authorId, string topic, string difficulty, int numQuestions, string[] allowedTypes)
     {
+        var user = await _userRepository.GetByIdAsync(authorId);
+        if (user == null || string.IsNullOrEmpty(user.OpenAiApiKey))
+        {
+            return ServiceResult<QuizDto>.CreateError("User not found or OpenAI API key not set");
+        }
+
+        var request = new QuizGenerationRequest
+        {
+            Topic = topic,
+            Difficulty = difficulty,
+            QuestionCount = numQuestions,
+            AllowedTypes = allowedTypes
+        };
+
+        var generationResult = await _openAiService.GenerateQuizAsync(
+            request,
+            user.OpenAiApiKey,
+            "gpt-4o-mini"
+        );
+        
+        if (!generationResult.Success)
+        {
+            return ServiceResult<QuizDto>.CreateError(generationResult.Message);
+        }
+
+        var generatedQuiz = generationResult.Data;
+        if (_openAiService.IsGenerationFailed(generatedQuiz))
+        {
+            return ServiceResult<QuizDto>.CreateError("Failed to generate a valid quiz");
+        }
+
         try
         {
-            var author = await _userRepository.GetByIdAsync(authorId);
-            if (author == null)
-                return ServiceResult<QuizDto>.CreateError("Author not found");
-
+            // Create the quiz entity
             var quiz = new Quiz
             {
                 AuthorId = authorId,
-                Prompt = prompt,
+                Prompt = topic,
                 Difficulty = difficulty,
                 NumQuestions = numQuestions,
                 AllowedTypes = allowedTypes,
@@ -36,12 +75,50 @@ public class QuizService : IQuizService
                 UpdatedAt = DateTime.UtcNow
             };
 
-            var createdQuiz = await _quizRepository.AddAsync(quiz);
-            return ServiceResult<QuizDto>.CreateSuccess(MapToDto(createdQuiz, author.Name));
+            // Save quiz to get its ID
+            var savedQuiz = await _quizRepository.AddAsync(quiz);
+
+            // Create and save questions
+            foreach (var generatedQuestion in generatedQuiz.Questions)
+            {
+                var question = new Question
+                {
+                    QuizId = savedQuiz.Id,
+                    Text = generatedQuestion.Text,
+                    Type = generatedQuestion.Type,
+                    Explanation = generatedQuestion.Explanation,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                var savedQuestion = await _questionRepository.AddAsync(question);
+
+                // Create and save answers for the question
+                foreach (var generatedOption in generatedQuestion.Options)
+                {
+                    var answer = new Answer
+                    {
+                        QuestionId = savedQuestion.Id,
+                        Text = generatedOption.Text,
+                        IsCorrect = generatedOption.IsCorrect,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    await _answerRepository.AddAsync(answer);
+                }
+            }
+
+            // Get the author's name for the DTO
+            var author = await _userRepository.GetByIdAsync(authorId);
+            if (author == null)
+                return ServiceResult<QuizDto>.CreateError("Quiz author not found");
+
+            return ServiceResult<QuizDto>.CreateSuccess(MapToDto(savedQuiz, author.Name));
         }
         catch (Exception ex)
         {
-            return ServiceResult<QuizDto>.CreateError($"Failed to create quiz: {ex.Message}");
+            return ServiceResult<QuizDto>.CreateError($"Failed to save generated quiz: {ex.Message}");
         }
     }
 

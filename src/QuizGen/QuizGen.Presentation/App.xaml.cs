@@ -21,7 +21,7 @@ namespace QuizGen.Presentation
         internal readonly IServiceProvider ServiceProvider;
         private readonly IAuthStateService _authStateService;
 
-        public static Window MainWindow { get; private set; }
+        public static Window MainWindow { get; set; }
 
         public App()
         {
@@ -48,13 +48,25 @@ namespace QuizGen.Presentation
             services.AddBusinessLogicLayer(config);
         }
 
-        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
             await _authStateService.LoadSavedStateAsync();
 
             if (_authStateService.IsAuthenticated)
             {
-                m_window = new MainWindow(ServiceProvider);
+                var authService = ServiceProvider.GetRequiredService<IAuthService>();
+                var result = await authService.AutoLoginAsync(_authStateService.CurrentCredentials!);
+                
+                if (result.Success)
+                {
+                    m_window = new MainWindow(ServiceProvider);
+                }
+                else
+                {
+                    _authStateService.ClearCredentials();
+                    await _authStateService.SaveStateAsync();
+                    m_window = new LoginWindow(ServiceProvider);
+                }
             }
             else
             {

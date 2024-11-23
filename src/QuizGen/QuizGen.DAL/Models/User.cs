@@ -27,11 +27,8 @@ public class User : BaseEntity
     [Column("openai_api_key")]
     public string? OpenAiApiKey { get; set; }
 
-    [Column("ollama_endpoint")]
-    public string OllamaEndpoint { get; set; } = "http://localhost:11434";
-
-    [Column("use_local_model")]
-    public bool UseLocalModel { get; set; }
+    [Column("gpt_model")]
+    public string GptModel { get; set; } = "gpt-4o-mini";
 
     // Navigation properties
     public ICollection<Quiz> Quizzes { get; set; }

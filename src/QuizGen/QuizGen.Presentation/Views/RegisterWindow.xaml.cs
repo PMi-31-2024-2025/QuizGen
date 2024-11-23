@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using QuizGen.BLL.Models.Auth;
 using QuizGen.BLL.Services.Interfaces;
 using System;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace QuizGen.Presentation.Views;
 
@@ -41,16 +43,22 @@ public sealed partial class RegisterWindow : Window
                 Username = UsernameBox.Text.Trim(),
                 Password = PasswordBox.Password,
                 Name = NameBox.Text.Trim(),
-                OpenAiApiKey = string.IsNullOrWhiteSpace(OpenAiKeyBox.Text) ? null : OpenAiKeyBox.Text.Trim(),
-                UseLocalModel = UseLocalModelCheck.IsChecked ?? false
             });
 
             if (result.Success)
             {
-                _authStateService.SetCurrentUser(result.Data);
+                var credentials = new StoredCredentials
+                {
+                    UserId = result.Data.UserId,
+                    Username = result.Data.Username,
+                    HashedPassword = HashPassword(PasswordBox.Password)
+                };
+                
+                _authStateService.SetCredentials(credentials);
                 await _authStateService.SaveStateAsync();
 
                 var mainWindow = new MainWindow(_serviceProvider);
+                App.MainWindow = mainWindow;
                 mainWindow.Activate();
                 Close();
             }
@@ -74,5 +82,12 @@ public sealed partial class RegisterWindow : Window
         var loginWindow = new LoginWindow(_serviceProvider);
         loginWindow.Activate();
         Close();
+    }
+
+    private string HashPassword(string password)
+    {
+        using var sha256 = SHA256.Create();
+        var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+        return Convert.ToBase64String(hashedBytes);
     }
 } 

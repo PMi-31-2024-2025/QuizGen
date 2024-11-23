@@ -4,9 +4,64 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Grid Padding="20">
-        <TextBlock Text="Create New Quiz"
-                  Style="{StaticResource TitleTextBlockStyle}"
-                  HorizontalAlignment="Center"
-                  VerticalAlignment="Center"/>
+        <StackPanel MaxWidth="600" Spacing="16" HorizontalAlignment="Center">
+            <TextBlock Text="Create New Quiz"
+                      Style="{StaticResource TitleTextBlockStyle}"
+                      HorizontalAlignment="Center"
+                      Margin="0,0,0,20"/>
+
+            <TextBox x:Name="TopicBox"
+                     Header="Quiz Topic"
+                     PlaceholderText="Enter the topic for your quiz"/>
+
+            <ComboBox x:Name="QuestionCountComboBox"
+                      Header="Number of Questions"
+                      HorizontalAlignment="Stretch">
+                <ComboBoxItem Content="3 questions"/>
+                <ComboBoxItem Content="6 questions"/>
+                <ComboBoxItem Content="9 questions"/>
+                <ComboBoxItem Content="12 questions"/>
+            </ComboBox>
+
+            <ComboBox x:Name="DifficultyComboBox"
+                      Header="Difficulty Level"
+                      HorizontalAlignment="Stretch">
+                <ComboBoxItem Content="Easy"/>
+                <ComboBoxItem Content="Medium"/>
+                <ComboBoxItem Content="Hard"/>
+                <ComboBoxItem Content="Expert"/>
+            </ComboBox>
+
+            <ComboBox x:Name="QuestionTypeComboBox"
+                      Header="Question Type"
+                      HorizontalAlignment="Stretch">
+                <ComboBoxItem Content="Single Selection"/>
+                <ComboBoxItem Content="Multiple Selection"/>
+                <ComboBoxItem Content="True/False"/>
+            </ComboBox>
+
+            <Button x:Name="GenerateButton"
+                    Content="Generate Quiz"
+                    Style="{StaticResource AccentButtonStyle}"
+                    HorizontalAlignment="Stretch"
+                    Margin="0,20,0,0"
+                    Click="GenerateButton_Click"/>
+        </StackPanel>
+
+        <!-- Loading Overlay -->
+        <Grid x:Name="LoadingOverlay" 
+              Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
+              Opacity="0.9" 
+              Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Spacing="12">
+                <ProgressRing IsActive="True" 
+                             Width="50" 
+                             Height="50"/>
+                <TextBlock Text="Generating quiz..." 
+                          Style="{StaticResource SubtitleTextBlockStyle}"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Page> 

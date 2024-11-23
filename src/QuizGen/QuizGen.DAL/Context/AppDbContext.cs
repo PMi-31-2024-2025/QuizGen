@@ -35,10 +35,8 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Username).HasColumnName("username").IsRequired();
             entity.Property(e => e.PasswordHash).HasColumnName("password_hash").IsRequired();
             entity.Property(e => e.OpenAiApiKey).HasColumnName("openai_api_key");
-            entity.Property(e => e.OllamaEndpoint).HasColumnName("ollama_endpoint")
-                .HasDefaultValue("http://localhost:11434");
-            entity.Property(e => e.UseLocalModel).HasColumnName("use_local_model")
-                .HasDefaultValue(false);
+            entity.Property(e => e.GptModel).HasColumnName("gpt_model")
+                .HasDefaultValue("gpt-4o-mini");
         });
 
         // Quiz configuration

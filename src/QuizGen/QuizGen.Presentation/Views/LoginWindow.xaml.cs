@@ -4,7 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using QuizGen.BLL.Models.Auth;
 using QuizGen.BLL.Services.Interfaces;
 using System;
-
+using System.Security.Cryptography;
+using System.Text;
 
 namespace QuizGen.Presentation.Views;
 
@@ -37,10 +38,18 @@ public sealed partial class LoginWindow : Window
 
             if (result.Success)
             {
-                _authStateService.SetCurrentUser(result.Data);
+                var credentials = new StoredCredentials
+                {
+                    UserId = result.Data.UserId,
+                    Username = result.Data.Username,
+                    HashedPassword = HashPassword(PasswordBox.Password)
+                };
+                
+                _authStateService.SetCredentials(credentials);
                 await _authStateService.SaveStateAsync();
 
                 var mainWindow = new MainWindow(_serviceProvider);
+                App.MainWindow = mainWindow;
                 mainWindow.Activate();
                 Close();
             }
@@ -64,5 +73,12 @@ public sealed partial class LoginWindow : Window
         var registerWindow = new RegisterWindow(_serviceProvider);
         registerWindow.Activate();
         Close();
+    }
+
+    private string HashPassword(string password)
+    {
+        using var sha256 = SHA256.Create();
+        var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+        return Convert.ToBase64String(hashedBytes);
     }
 } 

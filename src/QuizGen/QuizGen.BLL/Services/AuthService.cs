@@ -11,10 +11,12 @@ using QuizGen.DAL.Models;
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IAuthStateService _authStateService;
 
-    public AuthService(IUserRepository userRepository)
+    public AuthService(IUserRepository userRepository, IAuthStateService authStateService)
     {
         _userRepository = userRepository;
+        _authStateService = authStateService;
     }
 
     public async Task<ServiceResult<AuthResult>> LoginAsync(LoginRequest request)
@@ -28,7 +30,19 @@ public class AuthService : IAuthService
         if (user.PasswordHash != passwordHash)
             return ServiceResult<AuthResult>.CreateError("Invalid username or password");
 
-        return ServiceResult<AuthResult>.CreateSuccess(MapToAuthResult(user));
+        var authResult = MapToAuthResult(user);
+        
+        // Store credentials for auto-login
+        var credentials = new StoredCredentials
+        {
+            UserId = user.Id,
+            Username = user.Username,
+            HashedPassword = user.PasswordHash
+        };
+        _authStateService.SetCredentials(credentials);
+        await _authStateService.SaveStateAsync();
+
+        return ServiceResult<AuthResult>.CreateSuccess(authResult);
     }
 
     public async Task<ServiceResult<AuthResult>> RegisterAsync(RegisterRequest request)
@@ -46,15 +60,11 @@ public class AuthService : IAuthService
                 Username = request.Username,
                 PasswordHash = HashPassword(request.Password),
                 Name = request.Name,
-                OpenAiApiKey = request.OpenAiApiKey,
-                UseLocalModel = request.UseLocalModel,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                GptModel = "gpt-4o-mini"
             };
 
-            var createdUser = await _userRepository.AddAsync(user);
-            
-            return ServiceResult<AuthResult>.CreateSuccess(MapToAuthResult(createdUser));
+            await _userRepository.AddAsync(user);
+            return ServiceResult<AuthResult>.CreateSuccess(MapToAuthResult(user));
         }
         catch (Exception ex)
         {
@@ -79,7 +89,7 @@ public class AuthService : IAuthService
         return ServiceResult<bool>.CreateSuccess(true);
     }
 
-    public async Task<ServiceResult<bool>> UpdateProfileAsync(int userId, string name, string openAiApiKey, bool useLocalModel)
+    public async Task<ServiceResult<bool>> UpdateProfileAsync(int userId, string name, string openAiApiKey, string gptModel)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -87,11 +97,23 @@ public class AuthService : IAuthService
 
         user.Name = name;
         user.OpenAiApiKey = openAiApiKey;
-        user.UseLocalModel = useLocalModel;
+        user.GptModel = gptModel;
         user.UpdatedAt = DateTime.UtcNow;
 
         await _userRepository.UpdateAsync(user);
         return ServiceResult<bool>.CreateSuccess(true);
+    }
+
+    public async Task<ServiceResult<AuthResult>> AutoLoginAsync(StoredCredentials credentials)
+    {
+        var user = await _userRepository.GetByIdAsync(credentials.UserId);
+        if (user == null || user.Username != credentials.Username || 
+            user.PasswordHash != credentials.HashedPassword)
+        {
+            return ServiceResult<AuthResult>.CreateError("Stored credentials are invalid");
+        }
+
+        return ServiceResult<AuthResult>.CreateSuccess(MapToAuthResult(user));
     }
 
     private string HashPassword(string password)
@@ -109,7 +131,7 @@ public class AuthService : IAuthService
             Username = user.Username,
             Name = user.Name,
             OpenAiApiKey = user.OpenAiApiKey,
-            UseLocalModel = user.UseLocalModel
+            GptModel = user.GptModel
         };
     }
 }
