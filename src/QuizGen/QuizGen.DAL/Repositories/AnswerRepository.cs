@@ -22,4 +22,12 @@ public class AnswerRepository : BaseRepository<Answer>, IAnswerRepository
             .Where(a => a.QuestionId == questionId && a.IsCorrect)
             .ToListAsync();
     }
+
+    public async Task<IList<Answer>> GetByQuizIdAsync(int quizId)
+    {
+        return await _context.Answers
+            .Include(a => a.Question)
+            .Where(a => a.Question.QuizId == quizId)
+            .ToListAsync();
+    }
 }

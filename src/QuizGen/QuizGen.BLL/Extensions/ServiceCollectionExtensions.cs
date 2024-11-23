@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(config);
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IQuizService, QuizService>();
+        services.AddScoped<IQuizExportService, QuizExportService>();
 
         services.AddSingleton<IAuthStateService, AuthStateService>();
         services.AddSingleton<IOpenAiService, OpenAiService>();

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using QuizGen.BLL.Models.Quiz;
 using System.Threading.Tasks;
 using System.Linq;
+using QuizGen.BLL.Models.Base;
 
 namespace QuizGen.Presentation.Views.Pages;
 
@@ -14,6 +15,7 @@ public sealed partial class MyQuizzesPage : Page
 {
     private readonly IQuizService _quizService;
     private readonly IAuthStateService _authStateService;
+    private readonly IQuizExportService _quizExportService;
 
     public MyQuizzesPage()
     {
@@ -22,6 +24,7 @@ public sealed partial class MyQuizzesPage : Page
         var serviceProvider = ((App)Application.Current).ServiceProvider;
         _quizService = serviceProvider.GetRequiredService<IQuizService>();
         _authStateService = serviceProvider.GetRequiredService<IAuthStateService>();
+        _quizExportService = serviceProvider.GetRequiredService<IQuizExportService>();
 
         Loaded += MyQuizzesPage_Loaded;
     }
@@ -129,6 +132,98 @@ public sealed partial class MyQuizzesPage : Page
             XamlRoot = this.XamlRoot
         };
         await dialog.ShowAsync();
+    }
+
+    private async void ExportQuizButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button button && button.Tag is int quizId)
+        {
+            // Create export options panel
+            var optionsPanel = new StackPanel { Spacing = 16 };
+            
+            // Format selection
+            var formatPanel = new RadioButtons();
+            formatPanel.Header = "Export Format";
+            formatPanel.Items.Add("PDF Document (*.pdf)");
+            formatPanel.Items.Add("Text File (*.txt)");
+            formatPanel.SelectedIndex = 0;
+            optionsPanel.Children.Add(formatPanel);
+
+            // Include answers checkbox
+            var includeAnswersCheck = new CheckBox 
+            { 
+                Content = "Include correct answers",
+                IsChecked = false
+            };
+            optionsPanel.Children.Add(includeAnswersCheck);
+
+            var dialog = new ContentDialog
+            {
+                Title = "Export Quiz",
+                Content = optionsPanel,
+                PrimaryButtonText = "Export",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = this.XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                var isPdf = formatPanel.SelectedIndex == 0;
+                var includeAnswers = includeAnswersCheck.IsChecked ?? false;
+
+                // Get quiz details for filename
+                var quiz = ((IEnumerable<dynamic>)QuizList.ItemsSource)
+                    .First(q => q.Id == quizId);
+
+                var defaultFileName = $"{quiz.Name}_{quiz.CreatedAt:yyyy-MM-dd}";
+                defaultFileName += isPdf ? ".pdf" : ".txt";
+
+                // Show file picker
+                var savePicker = new Windows.Storage.Pickers.FileSavePicker
+                {
+                    SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary,
+                    SuggestedFileName = defaultFileName
+                };
+
+                // Initialize file picker
+                var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(MainWindow.Instance);
+                WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hwnd);
+
+                if (isPdf)
+                    savePicker.FileTypeChoices.Add("PDF Document", new[] { ".pdf" });
+                else
+                    savePicker.FileTypeChoices.Add("Text File", new[] { ".txt" });
+
+                var file = await savePicker.PickSaveFileAsync();
+                if (file != null)
+                {
+                    try
+                    {
+                        ServiceResult<byte[]> exportResult;
+                        if (isPdf)
+                            exportResult = await _quizExportService.ExportAsPdfAsync(quizId, includeAnswers);
+                        else
+                            exportResult = await _quizExportService.ExportAsTextAsync(quizId, includeAnswers);
+
+                        if (exportResult.Success)
+                        {
+                            await Windows.Storage.FileIO.WriteBytesAsync(file, exportResult.Data);
+                            MainWindow.Instance.ShowToast("Quiz exported successfully!");
+                        }
+                        else
+                        {
+                            await ShowError("Export Failed", exportResult.Message);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await ShowError("Export Failed", ex.Message);
+                    }
+                }
+            }
+        }
     }
 
     private async Task ShowError(string title, string message)

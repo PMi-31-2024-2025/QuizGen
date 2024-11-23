@@ -6,6 +6,7 @@ using QuizGen.BLL.Services.Interfaces;
 using QuizGen.Presentation.Views;
 using QuizGen.DAL.Extensions;
 using QuizGen.BLL.Extensions;
+using QuestPDF.Infrastructure;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -25,6 +26,9 @@ namespace QuizGen.Presentation
 
         public App()
         {
+            // Configure QuestPDF license
+            QuestPDF.Settings.License = LicenseType.Community;
+
             InitializeComponent();
 
             var services = new ServiceCollection();
