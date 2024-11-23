@@ -4,26 +4,33 @@ using Microsoft.UI.Windowing;
 using Windows.Graphics;
 using System;
 using QuizGen.Presentation.Views.Pages;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.UI.Xaml.Media;
 
 namespace QuizGen.Presentation;
 
 public sealed partial class MainWindow : Window
 {
     internal readonly IServiceProvider ServiceProvider;
+    private InfoBar _toastNotification;
 
     public MainWindow(IServiceProvider serviceProvider)
     {
         InitializeComponent();
         ServiceProvider = serviceProvider;
         InitializeWindow();
+        InitializeToastNotification();
         
         // Navigate to home page by default
-        NavView.SelectedItem = NavView.MenuItems[0];
-        ContentFrame.Navigate(typeof(CreateQuizPage));
+        NavigateTo("CreateQuizPage");
     }
+
+    public static MainWindow Instance { get; private set; }
 
     private void InitializeWindow()
     {
+        Instance = this;
         var appWindow = GetAppWindow();
         if (appWindow != null)
         {
@@ -76,14 +83,65 @@ public sealed partial class MainWindow : Window
 
         if (args.SelectedItem is NavigationViewItem selectedItem)
         {
-            string tag = selectedItem.Tag.ToString();
+            NavigateTo(selectedItem.Tag.ToString());
+        }
+    }
 
+    public void NavigateTo(string tag)
+    {
+        // Find the navigation item with matching tag
+        var menuItem = NavView.MenuItems
+            .OfType<NavigationViewItem>()
+            .FirstOrDefault(item => item.Tag.ToString() == tag);
+
+        if (menuItem != null)
+        {
+            NavView.SelectedItem = menuItem;
+            
             switch (tag)
             {
                 case "CreateQuizPage":
                     ContentFrame.Navigate(typeof(CreateQuizPage));
                     break;
+                case "MyQuizzesPage":
+                    ContentFrame.Navigate(typeof(MyQuizzesPage));
+                    break;
             }
         }
+    }
+
+    private void InitializeToastNotification()
+    {
+        _toastNotification = new InfoBar
+        {
+            IsOpen = false,
+            Severity = InfoBarSeverity.Success,
+            VerticalAlignment = VerticalAlignment.Top,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 24, 0, 0),
+            MaxWidth = 400,
+            IsClosable = false,
+            Background = Application.Current.Resources["CardBackgroundFillColorDefaultBrush"] as Brush,
+            BorderBrush = Application.Current.Resources["CardStrokeColorDefaultBrush"] as Brush,
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8)
+        };
+
+        // Add the InfoBar to the root Grid, above NavigationView
+        ((Grid)Content).Children.Insert(0, _toastNotification);
+    }
+
+    public void ShowToast(string message, InfoBarSeverity severity = InfoBarSeverity.Success)
+    {
+        _toastNotification.Message = message;
+        _toastNotification.Severity = severity;
+        _toastNotification.IsOpen = true;
+
+        // Auto-hide after 3 seconds
+        DispatcherQueue.TryEnqueue(async () =>
+        {
+            await Task.Delay(3000);
+            _toastNotification.IsOpen = false;
+        });
     }
 }

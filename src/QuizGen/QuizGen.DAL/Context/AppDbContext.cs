@@ -49,6 +49,7 @@ public class AppDbContext : DbContext
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
             entity.Property(e => e.AuthorId).HasColumnName("author_id").IsRequired();
+            entity.Property(e => e.Name).HasColumnName("name").IsRequired();
             entity.Property(e => e.Prompt).HasColumnName("prompt").IsRequired();
             entity.Property(e => e.Difficulty).HasColumnName("difficulty").IsRequired();
             entity.Property(e => e.NumQuestions).HasColumnName("num_questions").IsRequired();

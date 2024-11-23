@@ -9,4 +9,5 @@ public interface IQuizService
     Task<ServiceResult<QuizDto>> GetQuizByIdAsync(int id);
     Task<ServiceResult<IEnumerable<QuizDto>>> GetQuizzesByAuthorAsync(int authorId);
     Task<ServiceResult<IEnumerable<QuizDto>>> GetQuizzesByDifficultyAsync(string difficulty);
+    Task<ServiceResult<bool>> DeleteQuizAsync(int id);
 } 

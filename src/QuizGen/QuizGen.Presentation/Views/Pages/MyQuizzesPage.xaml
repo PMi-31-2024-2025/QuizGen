@@ -1,0 +1,88 @@
+ <Page
+    x:Class="QuizGen.Presentation.Views.Pages.MyQuizzesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer>
+        <StackPanel Spacing="20" Padding="20">
+            <TextBlock Text="My Quizzes"
+                      Style="{StaticResource TitleTextBlockStyle}"
+                      Margin="0,0,0,20"/>
+
+            <StackPanel x:Name="EmptyStateMessage" 
+                       Spacing="8"
+                       Visibility="Collapsed">
+                <TextBlock Text="You don't have any quizzes yet"
+                          Style="{StaticResource SubtitleTextBlockStyle}"/>
+                <TextBlock Text="Head over to Create Quiz page to generate your first quiz!"
+                          Opacity="0.8"/>
+            </StackPanel>
+
+            <ItemsRepeater x:Name="QuizList">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                  BorderThickness="1"
+                                  CornerRadius="8"
+                                  Padding="16"
+                                  Margin="0,0,0,16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Spacing="8">
+                                    <TextBlock Text="{Binding Name}"
+                                             Style="{StaticResource SubtitleTextBlockStyle}"/>
+                                    
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Opacity="0.7">
+                                            <Run Text="Prompt: " FontWeight="SemiBold"/>
+                                            <Run Text="{Binding Prompt}"/>
+                                        </TextBlock>
+
+                                        <TextBlock Opacity="0.7">
+                                            <Run Text="Questions: " FontWeight="SemiBold"/>
+                                            <Run Text="{Binding NumQuestions}"/>
+                                        </TextBlock>
+
+                                        <TextBlock Opacity="0.7">
+                                            <Run Text="Difficulty: " FontWeight="SemiBold"/>
+                                            <Run Text="{Binding Difficulty}"/>
+                                        </TextBlock>
+                                        
+                                        <TextBlock Opacity="0.7">
+                                            <Run Text="Types: " FontWeight="SemiBold"/>
+                                            <Run Text="{Binding QuestionTypes}"/>
+                                        </TextBlock>
+
+                                        <TextBlock Opacity="0.7">
+                                            <Run Text="Created: " FontWeight="SemiBold"/>
+                                            <Run Text="{Binding CreatedAt, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" 
+                                          Orientation="Horizontal" 
+                                          Spacing="8"
+                                          VerticalAlignment="Center">
+                                    <Button Content="Start Quiz"
+                                            Tag="{Binding Id}"
+                                            Click="StartQuizButton_Click"
+                                            Style="{StaticResource AccentButtonStyle}"/>
+                                    <Button Click="DeleteQuizButton_Click"
+                                            Tag="{Binding Id}">
+                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;"/>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

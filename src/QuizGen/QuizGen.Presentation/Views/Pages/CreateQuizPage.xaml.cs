@@ -92,14 +92,17 @@ public sealed partial class CreateQuizPage : Page
                 // Reset inputs to default state
                 TopicBox.Text = string.Empty;
                 InitializeDefaultValues();
-                // TODO: Navigate to My Quizzes page when ready
+                
+                // Show success toast and navigate
+                MainWindow.Instance.ShowToast("Quiz generated successfully!");
+                MainWindow.Instance.NavigateTo("MyQuizzesPage");
             }
             else
             {
                 var dialog = new ContentDialog
                 {
                     Title = "Something went wrong!",
-                    Content = "Quiz generation failed. Check your prompt and try again.",
+                    Content = $"Quiz generation failed. Check your prompt and try again. {result.Message}",
                     CloseButtonText = "OK",
                     XamlRoot = this.XamlRoot
                 };
@@ -112,7 +115,7 @@ public sealed partial class CreateQuizPage : Page
             var dialog = new ContentDialog
             {
                 Title = "Something went wrong!",
-                Content = "Quiz generation failed. Check your prompt and try again.",
+                Content = $"Quiz generation failed. Check your prompt and try again. {ex.Message} {ex.InnerException?.Message}",
                 CloseButtonText = "OK",
                 XamlRoot = this.XamlRoot
             };

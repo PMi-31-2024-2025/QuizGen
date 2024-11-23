@@ -67,6 +67,7 @@ public class QuizService : IQuizService
             var quiz = new Quiz
             {
                 AuthorId = authorId,
+                Name = generatedQuiz.Name,
                 Prompt = topic,
                 Difficulty = difficulty,
                 NumQuestions = numQuestions,
@@ -118,7 +119,7 @@ public class QuizService : IQuizService
         }
         catch (Exception ex)
         {
-            return ServiceResult<QuizDto>.CreateError($"Failed to save generated quiz: {ex.Message}");
+            return ServiceResult<QuizDto>.CreateError($"Failed to save generated quiz: {ex.Message} {ex.InnerException?.Message}");
         }
     }
 
@@ -185,6 +186,23 @@ public class QuizService : IQuizService
         }
     }
 
+    public async Task<ServiceResult<bool>> DeleteQuizAsync(int id)
+    {
+        try
+        {
+            var quiz = await _quizRepository.GetByIdAsync(id);
+            if (quiz == null)
+                return ServiceResult<bool>.CreateError("Quiz not found");
+
+            await _quizRepository.DeleteAsync(quiz.Id);
+            return ServiceResult<bool>.CreateSuccess(true);
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<bool>.CreateError($"Failed to delete quiz: {ex.Message}");
+        }
+    }
+
     private QuizDto MapToDto(Quiz quiz, string authorName)
     {
         return new QuizDto
@@ -192,6 +210,7 @@ public class QuizService : IQuizService
             Id = quiz.Id,
             AuthorId = quiz.AuthorId,
             AuthorName = authorName,
+            Name = quiz.Name,
             Prompt = quiz.Prompt,
             Difficulty = quiz.Difficulty,
             NumQuestions = quiz.NumQuestions,

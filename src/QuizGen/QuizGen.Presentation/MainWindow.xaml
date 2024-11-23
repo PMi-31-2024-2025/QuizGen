@@ -19,6 +19,7 @@
                        IsSettingsVisible="True">
             <NavigationView.MenuItems>
                 <NavigationViewItem Icon="Add" Content="Create Quiz" Tag="CreateQuizPage" />
+                <NavigationViewItem Icon="List" Content="My Quizzes" Tag="MyQuizzesPage" />
             </NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame" />

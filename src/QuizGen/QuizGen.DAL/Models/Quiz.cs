@@ -17,6 +17,10 @@ public class Quiz : BaseEntity
     public required int AuthorId { get; set; }
 
     [Required]
+    [Column("name")]
+    public required string Name { get; set; }
+
+    [Required]
     [Column("prompt")]
     public required string Prompt { get; set; }
 
