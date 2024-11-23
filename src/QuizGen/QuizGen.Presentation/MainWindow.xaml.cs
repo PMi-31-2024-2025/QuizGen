@@ -19,7 +19,7 @@ public sealed partial class MainWindow : Window
         
         // Navigate to home page by default
         NavView.SelectedItem = NavView.MenuItems[0];
-        ContentFrame.Navigate(typeof(HomePage));
+        ContentFrame.Navigate(typeof(CreateQuizPage));
     }
 
     private void InitializeWindow()
@@ -80,17 +80,8 @@ public sealed partial class MainWindow : Window
 
             switch (tag)
             {
-                case "HomePage":
-                    ContentFrame.Navigate(typeof(HomePage));
-                    break;
                 case "CreateQuizPage":
                     ContentFrame.Navigate(typeof(CreateQuizPage));
-                    break;
-                case "ProgressPage":
-                    ContentFrame.Navigate(typeof(ProgressPage));
-                    break;
-                case "ReportPage":
-                    ContentFrame.Navigate(typeof(ReportPage));
                     break;
             }
         }

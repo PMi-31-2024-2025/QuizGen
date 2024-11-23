@@ -3,63 +3,95 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Grid Padding="20">
-        <StackPanel MaxWidth="600" Spacing="16" HorizontalAlignment="Center">
-            <TextBlock Text="Create New Quiz"
-                      Style="{StaticResource TitleTextBlockStyle}"
-                      HorizontalAlignment="Center"
-                      Margin="0,0,0,20"/>
+    <Grid>
+        <ScrollViewer Padding="24,0">
+            <Grid VerticalAlignment="Center" Margin="0,40">
+                <StackPanel HorizontalAlignment="Center" 
+                          MaxWidth="800"
+                          MinWidth="280"
+                          Spacing="24">
+                    
+                    <!-- Greeting -->
+                    <TextBlock x:Name="GreetingText"
+                             Style="{StaticResource TitleTextBlockStyle}"
+                             HorizontalAlignment="Center"/>
+                    
+                    <TextBlock Text="Let's generate your next quiz"
+                             Style="{StaticResource SubtitleTextBlockStyle}"
+                             HorizontalAlignment="Center"
+                             Opacity="0.8"/>
 
-            <TextBox x:Name="TopicBox"
-                     Header="Quiz Topic"
-                     PlaceholderText="Enter the topic for your quiz"/>
+                    <!-- Quiz Topic Input -->
+                    <TextBox x:Name="TopicBox"
+                            PlaceholderText="Enter what you want to learn about..."
+                            Height="80"
+                            TextWrapping="Wrap"
+                            AcceptsReturn="True"
+                            TextChanged="TopicBox_TextChanged"/>
 
-            <ComboBox x:Name="QuestionCountComboBox"
-                      Header="Number of Questions"
-                      HorizontalAlignment="Stretch">
-                <ComboBoxItem Content="3 questions"/>
-                <ComboBoxItem Content="6 questions"/>
-                <ComboBoxItem Content="9 questions"/>
-                <ComboBoxItem Content="12 questions"/>
-            </ComboBox>
+                    <!-- Controls Grid with Adaptive Layout -->
+                    <Grid x:Name="ControlsGrid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <ComboBox Grid.Column="0" 
+                                 x:Name="QuestionCountComboBox"
+                                 HorizontalAlignment="Stretch"
+                                 Width="190">
+                            <ComboBoxItem Content="3 questions"/>
+                            <ComboBoxItem Content="6 questions"/>
+                            <ComboBoxItem Content="9 questions"/>
+                            <ComboBoxItem Content="12 questions"/>
+                        </ComboBox>
 
-            <ComboBox x:Name="DifficultyComboBox"
-                      Header="Difficulty Level"
-                      HorizontalAlignment="Stretch">
-                <ComboBoxItem Content="Easy"/>
-                <ComboBoxItem Content="Medium"/>
-                <ComboBoxItem Content="Hard"/>
-                <ComboBoxItem Content="Expert"/>
-            </ComboBox>
+                        <ComboBox Grid.Column="1" 
+                                 x:Name="DifficultyComboBox"
+                                 HorizontalAlignment="Stretch"
+                                 Width="190">
+                            <ComboBoxItem Content="Easy difficulty"/>
+                            <ComboBoxItem Content="Medium difficulty"/>
+                            <ComboBoxItem Content="Hard difficulty"/>
+                            <ComboBoxItem Content="Expert difficulty"/>
+                        </ComboBox>
 
-            <ComboBox x:Name="QuestionTypeComboBox"
-                      Header="Question Type"
-                      HorizontalAlignment="Stretch">
-                <ComboBoxItem Content="Single Selection"/>
-                <ComboBoxItem Content="Multiple Selection"/>
-                <ComboBoxItem Content="True/False"/>
-            </ComboBox>
+                        <ComboBox Grid.Column="2" 
+                                 x:Name="QuestionTypeComboBox"
+                                 HorizontalAlignment="Stretch"
+                                 Width="190">
+                            <ComboBoxItem Content="Single choice questions"/>
+                            <ComboBoxItem Content="Multiple choice questions"/>
+                            <ComboBoxItem Content="True/False questions"/>
+                        </ComboBox>
+                    </Grid>
 
-            <Button x:Name="GenerateButton"
-                    Content="Generate Quiz"
-                    Style="{StaticResource AccentButtonStyle}"
-                    HorizontalAlignment="Stretch"
-                    Margin="0,20,0,0"
-                    Click="GenerateButton_Click"/>
-        </StackPanel>
+                    <!-- Generate Button -->
+                    <Button x:Name="GenerateButton"
+                            Content="Generate quiz!"
+                            Style="{StaticResource AccentButtonStyle}"
+                            HorizontalAlignment="Center"
+                            FontSize="16"
+                            Padding="40,8"
+                            IsEnabled="False"
+                            Click="GenerateButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
 
         <!-- Loading Overlay -->
         <Grid x:Name="LoadingOverlay" 
-              Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
+              Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
               Opacity="0.9" 
               Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" 
-                        VerticalAlignment="Center" 
-                        Spacing="12">
+                       VerticalAlignment="Center" 
+                       Spacing="16">
                 <ProgressRing IsActive="True" 
-                             Width="50" 
-                             Height="50"/>
-                <TextBlock Text="Generating quiz..." 
+                            Width="60" 
+                            Height="60"/>
+                <TextBlock Text="Generating your quiz..." 
                           Style="{StaticResource SubtitleTextBlockStyle}"/>
             </StackPanel>
         </Grid>

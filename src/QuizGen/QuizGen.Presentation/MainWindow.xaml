@@ -10,7 +10,7 @@
 
     <Grid>
         <NavigationView x:Name="NavView"
-                       PaneTitle="Menu" 
+                       PaneTitle="QuizGen" 
                        SelectionChanged="NavigationView_SelectionChanged"
                        IsBackButtonVisible="Collapsed"
                        IsBackEnabled="False"
@@ -18,10 +18,7 @@
                        IsPaneToggleButtonVisible="True"
                        IsSettingsVisible="True">
             <NavigationView.MenuItems>
-                <NavigationViewItem Icon="Home" Content="Home" Tag="HomePage" />
                 <NavigationViewItem Icon="Add" Content="Create Quiz" Tag="CreateQuizPage" />
-                <NavigationViewItem Icon="Refresh" Content="My Progress" Tag="ProgressPage" />
-                <NavigationViewItem Icon="Document" Content="Reports" Tag="ReportPage" />
             </NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame" />
