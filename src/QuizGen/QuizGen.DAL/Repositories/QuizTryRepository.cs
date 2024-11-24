@@ -98,4 +98,20 @@ public class QuizTryRepository : BaseRepository<QuizTry>, IQuizTryRepository
         await _context.QuizAnswers.AddAsync(answer);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<IEnumerable<QuizTry>> GetCompletedQuizTriesByUserAsync(int userId)
+    {
+        return await _context.QuizTries
+            .Include(qt => qt.Quiz)
+            .Where(qt => qt.UserId == userId && qt.FinishedAt != null)
+            .OrderByDescending(qt => qt.StartedAt)
+            .ToListAsync();
+    }
+
+    public async Task<IList<QuizAnswer>> GetAnswersAsync(int quizTryId)
+    {
+        return await _context.QuizAnswers
+            .Where(a => a.QuizTryId == quizTryId)
+            .ToListAsync();
+    }
 }

@@ -267,181 +267,23 @@ public sealed partial class QuizWindow : Window
         try
         {
             LoadingOverlay.Visibility = Visibility.Visible;
-            await SaveCurrentAnswers();
-
             var result = await _quizTryService.CalculateAndSaveScoreAsync(_quizTryId);
+            
             if (result.Success)
             {
                 _isFinished = true;
-                QuestionView.Visibility = Visibility.Collapsed;
-                ProgressSection.Visibility = Visibility.Collapsed;
-                ResultsView.Visibility = Visibility.Visible;
-                
-                // Update score display
-                var score = result.Data.Score;
-                ScoreRing.Value = score;
-                ScoreRing.Foreground = new SolidColorBrush(
-                    score >= 50 
-                        ? Color.FromArgb(255, 16, 124, 16)
-                        : Color.FromArgb(255, 184, 0, 0));
-                
-                ScorePercentText.Text = $"{score:F0}%";
-                ScoreResultText.Text = score >= 50 ? "Quiz Passed" : "Quiz Failed";
-                
-                // Display question review
-                QuestionsReviewPanel.Children.Clear();
-                foreach (var question in result.Data.Questions)
-                {
-                    var questionPanel = new StackPanel { Spacing = 16 };
-                    
-                    // Create header panel with icon and question text
-                    var headerPanel = new Grid();
-                    headerPanel.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                    headerPanel.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                    headerPanel.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-                    // Add icon
-                    var icon = new FontIcon
-                    {
-                        Glyph = question.IsCorrect ? "\uE73E" : "\uE711",
-                        Foreground = new SolidColorBrush(
-                            question.IsCorrect 
-                                ? Color.FromArgb(255, 16, 124, 16)
-                                : Color.FromArgb(255, 184, 0, 0)),
-                        FontSize = 20,
-                        VerticalAlignment = VerticalAlignment.Top,
-                        Margin = new Thickness(0, 2, 8, 0)
-                    };
-                    Grid.SetColumn(icon, 0);
-
-                    // Add question text
-                    var questionText = new TextBlock
-                    {
-                        Text = question.Text,
-                        TextWrapping = TextWrapping.Wrap,
-                        MaxWidth = 600,
-                        Style = Application.Current.Resources["BodyStrongTextBlockStyle"] as Style
-                    };
-                    Grid.SetColumn(questionText, 1);
-
-                    // Add score text
-                    var scoreText = new TextBlock
-                    {
-                        Text = question.Score > 0 
-                            ? $"+{question.Score:F1}% to total score ({question.CorrectPercentage:F0}% correct)"
-                            : $"+0% to total score (0% correct)",
-                        Foreground = new SolidColorBrush(
-                            question.Score > 0 
-                                ? Color.FromArgb(255, 16, 124, 16)
-                                : Color.FromArgb(255, 128, 128, 128)),
-                        Style = Application.Current.Resources["CaptionTextBlockStyle"] as Style,
-                        VerticalAlignment = VerticalAlignment.Top,
-                        Margin = new Thickness(16, 2, 0, 0),
-                        Opacity = question.Score > 0 ? 1 : 0.7
-                    };
-                    Grid.SetColumn(scoreText, 2);
-
-                    headerPanel.Children.Add(icon);
-                    headerPanel.Children.Add(questionText);
-                    headerPanel.Children.Add(scoreText);
-
-                    questionPanel.Children.Add(headerPanel);
-
-                    // Add answers review with no left margin
-                    var answersPanel = new StackPanel 
-                    { 
-                        Spacing = 8, 
-                        Margin = new Thickness(32, 8, 0, 0)
-                    };
-                    foreach (var answer in question.Answers)
-                    {
-                        var answerStackPanel = new StackPanel 
-                        { 
-                            Orientation = Orientation.Horizontal,
-                            Spacing = 8 
-                        };
-
-                        var answerText = new TextBlock
-                        {
-                            Text = answer.Text,
-                            TextWrapping = TextWrapping.Wrap,
-                            Foreground = new SolidColorBrush(
-                                answer.IsCorrect ? Color.FromArgb(255, 16, 124, 16) : 
-                                Color.FromArgb(255, 128, 128, 128)),
-                            Style = Application.Current.Resources["BodyTextBlockStyle"] as Style
-                        };
-                        answerStackPanel.Children.Add(answerText);
-
-                        if (answer.WasSelected)
-                        {
-                            var yourAnswerText = new TextBlock
-                            {
-                                Text = "(your answer)",
-                                Foreground = new SolidColorBrush(Color.FromArgb(255, 128, 128, 128)),
-                                Style = Application.Current.Resources["CaptionTextBlockStyle"] as Style,
-                                VerticalAlignment = VerticalAlignment.Center,
-                                Margin = new Thickness(8, 0, 0, 0),
-                                Opacity = 0.7
-                            };
-                            answerStackPanel.Children.Add(yourAnswerText);
-                        }
-
-                        answersPanel.Children.Add(answerStackPanel);
-                    }
-                    questionPanel.Children.Add(answersPanel);
-
-                    // Add explanation if available
-                    if (!string.IsNullOrEmpty(question.Explanation))
-                    {
-                        var explanationPanel = new StackPanel 
-                        { 
-                            Spacing = 4,
-                            Margin = new Thickness(32, 8, 0, 0)
-                        };
-                        
-                        explanationPanel.Children.Add(new TextBlock
-                        {
-                            Text = "Explanation:",
-                            FontWeight = FontWeights.SemiBold,
-                            Style = Application.Current.Resources["CaptionTextBlockStyle"] as Style
-                        });
-                        
-                        explanationPanel.Children.Add(new TextBlock
-                        {
-                            Text = question.Explanation,
-                            TextWrapping = TextWrapping.Wrap,
-                            Style = Application.Current.Resources["CaptionTextBlockStyle"] as Style,
-                            Opacity = 0.8
-                        });
-                        
-                        questionPanel.Children.Add(explanationPanel);
-                    }
-
-                    QuestionsReviewPanel.Children.Add(questionPanel);
-                }
+                var resultWindow = new QuizResultWindow(result.Data);
+                resultWindow.Activate();
+                Close();
             }
             else
             {
-                var dialog = new ContentDialog
-                {
-                    Title = "Something went wrong!",
-                    Content = $"Failed to calculate quiz results. {result.Message}",
-                    CloseButtonText = "OK",
-                    XamlRoot = Content.XamlRoot
-                };
-                await dialog.ShowAsync();
+                await ShowError("Failed to finish quiz", result.Message);
             }
         }
         catch (Exception ex)
         {
-            var dialog = new ContentDialog
-            {
-                Title = "Something went wrong!",
-                Content = $"Failed to finish quiz. {ex.Message}",
-                CloseButtonText = "OK",
-                XamlRoot = Content.XamlRoot
-            };
-            await dialog.ShowAsync();
+            await ShowError("Failed to finish quiz", ex.Message);
         }
         finally
         {
@@ -497,6 +339,4 @@ public sealed partial class QuizWindow : Window
             ? "Finish Quiz" 
             : "Next Question";
     }
-
-    // Continue with UpdateQuizInfoView and other methods...
 } 

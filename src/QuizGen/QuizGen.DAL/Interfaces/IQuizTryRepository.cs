@@ -14,4 +14,6 @@ public interface IQuizTryRepository : IRepository<QuizTry>
     Task<bool> DeleteWithAnswersAsync(int quizTryId);
     Task RemoveAnswersForQuestionAsync(int quizTryId, int questionId);
     Task AddAnswerAsync(QuizAnswer answer);
+    Task<IEnumerable<QuizTry>> GetCompletedQuizTriesByUserAsync(int userId);
+    Task<IList<QuizAnswer>> GetAnswersAsync(int quizTryId);
 }

@@ -83,19 +83,15 @@ public class QuizTryService : IQuizTryService
         }
     }
 
-    public async Task<ServiceResult<QuizTryDto>> GetQuizTryByIdAsync(int id)
+    public async Task<ServiceResult<QuizTryResultDto>> GetQuizTryByIdAsync(int quizTryId)
     {
         try
         {
-            var quizTry = await _quizTryRepository.GetByIdAsync(id);
-            if (quizTry == null)
-                return ServiceResult<QuizTryDto>.CreateError("QuizTry not found");
-
-            return ServiceResult<QuizTryDto>.CreateSuccess(await MapToDto(quizTry));
+            return await CalculateAndSaveScoreAsync(quizTryId);
         }
         catch (Exception ex)
         {
-            return ServiceResult<QuizTryDto>.CreateError($"Failed to get quiz try: {ex.Message}");
+            return ServiceResult<QuizTryResultDto>.CreateError($"Failed to get quiz try: {ex.Message}");
         }
     }
 
@@ -337,6 +333,64 @@ public class QuizTryService : IQuizTryService
         catch (Exception ex)
         {
             return ServiceResult<bool>.CreateError($"Failed to save answers: {ex.Message}");
+        }
+    }
+
+    public async Task<ServiceResult<QuizTryStatisticsDto>> GetUserStatisticsAsync(int userId)
+    {
+        try
+        {
+            var quizTries = await _quizTryRepository.GetCompletedByUserIdAsync(userId);
+            
+            if (!quizTries.Any())
+                return ServiceResult<QuizTryStatisticsDto>.CreateSuccess(new QuizTryStatisticsDto());
+
+            var completedTries = quizTries.Where(qt => qt.FinishedAt.HasValue).ToList();
+            var statistics = new QuizTryStatisticsDto
+            {
+                TotalTries = completedTries.Count,
+                AverageScore = completedTries.Average(qt => qt.Score ?? 0),
+                AverageTime = TimeSpan.FromTicks((long)completedTries
+                    .Where(qt => qt.FinishedAt.HasValue)
+                    .Average(qt => (qt.FinishedAt.Value - qt.StartedAt).Ticks)),
+                PassRate = (double)completedTries.Count(qt => (qt.Score ?? 0) >= 50) / completedTries.Count * 100
+            };
+
+            return ServiceResult<QuizTryStatisticsDto>.CreateSuccess(statistics);
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<QuizTryStatisticsDto>.CreateError($"Failed to get user statistics: {ex.Message}");
+        }
+    }
+
+    public async Task<ServiceResult<IEnumerable<QuizTryListItemDto>>> GetUserQuizTriesAsync(int userId)
+    {
+        try
+        {
+            var quizTries = await _quizTryRepository.GetCompletedByUserIdAsync(userId);
+            
+            var dtos = quizTries
+                .Where(qt => qt.FinishedAt.HasValue)
+                .Select(qt => new QuizTryListItemDto
+                {
+                    Id = qt.Id,
+                    QuizName = qt.Quiz.Name,
+                    Difficulty = qt.Quiz.Difficulty,
+                    QuestionTypes = qt.Quiz.AllowedTypes,
+                    TotalQuestions = qt.Quiz.NumQuestions,
+                    Score = qt.Score ?? 0,
+                    Duration = qt.FinishedAt.Value - qt.StartedAt,
+                    StartedAt = qt.StartedAt,
+                    FinishedAt = qt.FinishedAt.Value
+                });
+
+            return ServiceResult<IEnumerable<QuizTryListItemDto>>.CreateSuccess(dtos);
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<IEnumerable<QuizTryListItemDto>>.CreateError(
+                $"Failed to get user quiz tries: {ex.Message}");
         }
     }
 

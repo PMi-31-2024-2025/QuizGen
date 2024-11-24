@@ -7,7 +7,7 @@ public interface IQuizTryService
 {
     Task<ServiceResult<QuizTryDto>> StartQuizTryAsync(int quizId, int userId);
     Task<ServiceResult<QuizTryDto>> FinishQuizTryAsync(int quizTryId);
-    Task<ServiceResult<QuizTryDto>> GetQuizTryByIdAsync(int id);
+    Task<ServiceResult<QuizTryResultDto>> GetQuizTryByIdAsync(int quizTryId);
     Task<ServiceResult<IEnumerable<QuizTryDto>>> GetQuizTriesByUserAsync(int userId);
     Task<ServiceResult<IEnumerable<QuizTryDto>>> GetQuizTriesByQuizAsync(int quizId);
     Task<ServiceResult<IEnumerable<QuizTryDto>>> GetCompletedQuizTriesByUserAsync(int userId);
@@ -15,4 +15,6 @@ public interface IQuizTryService
     Task<ServiceResult<bool>> DeleteQuizTryAsync(int quizTryId);
     Task<ServiceResult<QuizTryResultDto>> CalculateAndSaveScoreAsync(int quizTryId);
     Task<ServiceResult<bool>> SaveAnswersAsync(int quizTryId, int questionId, List<int> selectedAnswerIds);
+    Task<ServiceResult<QuizTryStatisticsDto>> GetUserStatisticsAsync(int userId);
+    Task<ServiceResult<IEnumerable<QuizTryListItemDto>>> GetUserQuizTriesAsync(int userId);
 } 

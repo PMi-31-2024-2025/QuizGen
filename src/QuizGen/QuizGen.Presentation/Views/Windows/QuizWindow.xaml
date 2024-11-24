@@ -121,43 +121,6 @@
                                     Click="NextButton_Click"/>
                         </Grid>
                     </Grid>
-
-                    <!-- Results View -->
-                    <StackPanel x:Name="ResultsView" 
-                              Visibility="Collapsed"
-                              Spacing="32">
-                        <!-- Score Section -->
-                        <StackPanel Spacing="16" 
-                                    Margin="0,32,0,32" 
-                                    HorizontalAlignment="Center">
-                            <!-- Progress Ring -->
-                            <Grid Width="120" Height="120">
-                                <ProgressRing x:Name="ScoreRing"
-                                             IsIndeterminate="False"
-                                             Value="0"
-                                             Maximum="100"
-                                             Width="120"
-                                             Height="120"/>
-                                <TextBlock x:Name="ScorePercentText"
-                                          Style="{StaticResource TitleTextBlockStyle}"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"/>
-                            </Grid>
-                            
-                            <TextBlock x:Name="ScoreResultText"
-                                      Style="{StaticResource SubtitleTextBlockStyle}"
-                                      Opacity="0.8"
-                                      HorizontalAlignment="Center"/>
-                        </StackPanel>
-                        
-                        <StackPanel x:Name="QuestionsReviewPanel" 
-                                    Spacing="32"/>
-                        
-                        <Button Content="Close"
-                                Style="{StaticResource AccentButtonStyle}"
-                                HorizontalAlignment="Center"
-                                Click="CloseButton_Click"/>
-                    </StackPanel>
                 </Grid>
             </Grid>
         </ScrollViewer>

@@ -4,19 +4,26 @@ using QuizGen.DAL.Models;
 
 namespace QuizGen.BLL.Services.Documents;
 
-public class QuizDocument : IDocument
+public class QuizTryDocument : IDocument
 {
     private readonly Quiz _quiz;
+    private readonly QuizTry _quizTry;
     private readonly IList<Question> _questions;
     private readonly IList<Answer> _answers;
-    private readonly bool _includeAnswers;
+    private readonly IList<QuizAnswer> _selectedAnswers;
 
-    public QuizDocument(Quiz quiz, IList<Question> questions, IList<Answer> answers, bool includeAnswers)
+    public QuizTryDocument(
+        Quiz quiz, 
+        QuizTry quizTry, 
+        IList<Question> questions, 
+        IList<Answer> answers, 
+        IList<QuizAnswer> selectedAnswers)
     {
         _quiz = quiz;
+        _quizTry = quizTry;
         _questions = questions;
         _answers = answers;
-        _includeAnswers = includeAnswers;
+        _selectedAnswers = selectedAnswers;
     }
 
     public void Compose(IDocumentContainer container)
@@ -24,7 +31,6 @@ public class QuizDocument : IDocument
         container.Page(page =>
         {
             page.Margin(50);
-
             page.Header().Element(ComposeHeader);
             page.Content().Element(ComposeContent);
             page.Footer().Element(ComposeFooter);
@@ -46,6 +52,15 @@ public class QuizDocument : IDocument
 
                 column.Item().Text($"Difficulty: {char.ToUpper(_quiz.Difficulty[0]) + _quiz.Difficulty[1..]}")
                     .FontSize(12);
+
+                column.Item().PaddingTop(10).Grid(grid =>
+                {
+                    grid.Columns(2);
+                    grid.Item().Text($"Taken on: {_quizTry.StartedAt:g}")
+                        .FontSize(12);
+                    grid.Item().Text($"Score: {_quizTry.Score:F1}%")
+                        .FontSize(12);
+                });
             });
         });
     }
@@ -58,6 +73,10 @@ public class QuizDocument : IDocument
             {
                 var question = _questions[i];
                 var questionAnswers = _answers.Where(a => a.QuestionId == question.Id).ToList();
+                var userAnswers = _selectedAnswers
+                    .Where(a => a.QuestionId == question.Id)
+                    .Select(a => a.AnswerId)
+                    .ToList();
 
                 column.Item().Text($"{i + 1}. {question.Text}")
                     .FontSize(12)
@@ -65,16 +84,25 @@ public class QuizDocument : IDocument
 
                 foreach (var answer in questionAnswers)
                 {
+                    var isSelected = userAnswers.Contains(answer.Id);
                     column.Item().PaddingLeft(20).Text(text =>
                     {
                         text.Span("- ").FontSize(11);
                         text.Span(answer.Text)
                             .FontSize(11)
-                            .FontColor(_includeAnswers && answer.IsCorrect ? "#008000" : "#000000");
+                            .FontColor(answer.IsCorrect ? "#008000" : "#000000");
+                        
+                        if (isSelected)
+                        {
+                            text.Span(" (your answer)")
+                                .FontSize(11)
+                                .FontColor("#666666")
+                                .Italic();
+                        }
                     });
                 }
 
-                if (_includeAnswers && !string.IsNullOrEmpty(question.Explanation))
+                if (!string.IsNullOrEmpty(question.Explanation))
                 {
                     column.Item().PaddingLeft(20).PaddingTop(5)
                         .Text($"Explanation: {question.Explanation}")
@@ -105,4 +133,7 @@ public class QuizDocument : IDocument
             });
         });
     }
+
+    public byte[] GeneratePdf() => Document.Create(container => 
+        Compose(container)).GeneratePdf();
 } 

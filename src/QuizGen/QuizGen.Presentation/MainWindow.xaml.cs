@@ -106,6 +106,9 @@ public sealed partial class MainWindow : Window
                 case "MyQuizzesPage":
                     ContentFrame.Navigate(typeof(MyQuizzesPage));
                     break;
+                case "QuizHistoryPage":
+                    ContentFrame.Navigate(typeof(QuizHistoryPage));
+                    break;
             }
         }
     }

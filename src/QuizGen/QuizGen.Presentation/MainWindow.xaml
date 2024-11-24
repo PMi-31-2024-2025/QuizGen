@@ -20,6 +20,7 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem Icon="Add" Content="Create Quiz" Tag="CreateQuizPage" />
                 <NavigationViewItem Icon="List" Content="My Quizzes" Tag="MyQuizzesPage" />
+                <NavigationViewItem Icon="Clock" Content="Quiz History" Tag="QuizHistoryPage" />
             </NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame" />
