@@ -20,7 +20,7 @@
                           Style="{StaticResource SubtitleTextBlockStyle}"
                           Margin="0,0,0,16"/>
 
-                <StackPanel>
+                <StackPanel Spacing="8">
                     <TextBox x:Name="NameBox"
                             Header="Name"
                             Margin="0,0,0,8"/>

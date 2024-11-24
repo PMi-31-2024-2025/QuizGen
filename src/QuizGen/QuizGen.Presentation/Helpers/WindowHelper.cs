@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using System.Collections.Generic;
+using QuizGen.Presentation.Views.Windows;
 
 namespace QuizGen.Presentation.Helpers;
 

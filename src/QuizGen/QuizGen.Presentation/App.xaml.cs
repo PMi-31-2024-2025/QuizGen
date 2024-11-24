@@ -3,19 +3,13 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using QuizGen.BLL.Configuration;
 using QuizGen.BLL.Services.Interfaces;
-using QuizGen.Presentation.Views;
 using QuizGen.DAL.Extensions;
 using QuizGen.BLL.Extensions;
 using QuestPDF.Infrastructure;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using QuizGen.Presentation.Views.Windows;
 
 namespace QuizGen.Presentation
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
     public partial class App : Application
     {
         private Window m_window;

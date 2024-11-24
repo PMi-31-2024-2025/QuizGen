@@ -7,6 +7,7 @@ using QuizGen.BLL.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using QuizGen.Presentation.Views.Windows;
 
 namespace QuizGen.Presentation.Views.Pages;
 

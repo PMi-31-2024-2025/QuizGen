@@ -7,8 +7,9 @@ using QuizGen.Presentation.Views.Pages;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml.Media;
+using Windows.UI;
 
-namespace QuizGen.Presentation;
+namespace QuizGen.Presentation.Views.Windows;
 
 public sealed partial class MainWindow : Window
 {
@@ -60,8 +61,8 @@ public sealed partial class MainWindow : Window
                 // Enable transparency for titlebar
                 var titleBar = appWindow.TitleBar;
                 titleBar.ExtendsContentIntoTitleBar = true;
-                titleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
-                titleBar.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+                titleBar.ButtonBackgroundColor = Color.FromArgb(0, 0, 0, 0);
+                titleBar.ButtonInactiveBackgroundColor = Color.FromArgb(0, 0, 0, 0);
             }
         }
     }

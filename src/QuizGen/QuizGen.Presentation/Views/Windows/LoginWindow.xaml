@@ -1,0 +1,84 @@
+<Window
+    x:Class="QuizGen.Presentation.Views.Windows.LoginWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Welcome to QuizGen">
+
+    <Grid>
+        <StackPanel Margin="24,48,24,24" 
+                    Spacing="24"
+                    VerticalAlignment="Center"
+                    MaxHeight="600">
+            <!-- Logo/Title -->
+            <StackPanel HorizontalAlignment="Center" Spacing="8">
+                <FontIcon Glyph="&#xE7BE;" FontSize="32"/>
+                <TextBlock Text="QuizGen"
+                         Style="{StaticResource TitleTextBlockStyle}"
+                         HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Login Form -->
+            <StackPanel x:Name="LoginForm" Spacing="16">
+                <TextBox x:Name="LoginUsernameBox" 
+                        PlaceholderText="Username"
+                        TextChanged="ValidateLoginFields"/>
+                
+                <PasswordBox x:Name="LoginPasswordBox" 
+                           PlaceholderText="Password"
+                           PasswordChanged="ValidateLoginFields"/>
+                
+                <Button x:Name="LoginButton"
+                        Content="Login"
+                        Style="{StaticResource AccentButtonStyle}"
+                        HorizontalAlignment="Stretch"
+                        IsEnabled="False"
+                        Click="LoginButton_Click"/>
+
+                <HyperlinkButton x:Name="ShowRegisterButton"
+                                Content="Don't have an account? Register"
+                                HorizontalAlignment="Center"
+                                Click="ShowRegisterButton_Click"/>
+            </StackPanel>
+
+            <!-- Register Form -->
+            <StackPanel x:Name="RegisterForm" 
+                       Spacing="16" 
+                       Visibility="Collapsed">
+                <TextBox x:Name="RegisterNameBox" 
+                        PlaceholderText="Full Name"
+                        TextChanged="ValidateRegisterFields"/>
+                
+                <TextBox x:Name="RegisterUsernameBox" 
+                        PlaceholderText="Username"
+                        TextChanged="ValidateRegisterFields"/>
+                
+                <PasswordBox x:Name="RegisterPasswordBox" 
+                           PlaceholderText="Password"
+                           PasswordChanged="ValidateRegisterFields"/>
+
+                <CheckBox x:Name="TermsCheckBox"
+                        Content="I agree to the Terms and Conditions"
+                        Checked="ValidateRegisterFields"
+                        Unchecked="ValidateRegisterFields"/>
+                
+                <Button x:Name="RegisterButton"
+                        Content="Create Account"
+                        Style="{StaticResource AccentButtonStyle}"
+                        HorizontalAlignment="Stretch"
+                        IsEnabled="False"
+                        Click="RegisterButton_Click"/>
+
+                <HyperlinkButton x:Name="ShowLoginButton"
+                                Content="Already have an account? Login"
+                                HorizontalAlignment="Center"
+                                Click="ShowLoginButton_Click"/>
+            </StackPanel>
+
+            <!-- Error Message -->
+            <TextBlock x:Name="ErrorText" 
+                      Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                      TextWrapping="Wrap"
+                      TextAlignment="Center"/>
+        </StackPanel>
+    </Grid>
+</Window>

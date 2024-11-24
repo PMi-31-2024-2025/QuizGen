@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using QuizGen.BLL.Services.Interfaces;
 using System;
-using QuizGen.BLL.Models.Auth;
+using QuizGen.Presentation.Views.Windows;
 
 namespace QuizGen.Presentation.Views.Pages;
 
