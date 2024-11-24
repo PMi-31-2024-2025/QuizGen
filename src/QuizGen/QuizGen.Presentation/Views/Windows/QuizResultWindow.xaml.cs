@@ -7,6 +7,7 @@ using Windows.UI;
 using Microsoft.UI.Text;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
+using QuizGen.Presentation.Helpers;
 
 namespace QuizGen.Presentation.Views.Windows;
 
@@ -24,6 +25,9 @@ public sealed partial class QuizResultWindow : Window
         var appWindow = GetAppWindow();
         if (appWindow != null)
         {
+            // Set minimum size (16:9 ratio)
+            WindowMinSizeHelper.SetMinSize(this, 960, 540);
+
             appWindow.SetPresenter(AppWindowPresenterKind.Default);
 
             // Get the screen dimensions
