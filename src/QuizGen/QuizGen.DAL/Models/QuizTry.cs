@@ -26,6 +26,9 @@ public class QuizTry : BaseEntity
     [Column("finished_at")]
     public DateTime? FinishedAt { get; set; }
 
+    [Column("score")]
+    public double? Score { get; set; }
+
     // Navigation properties
     public Quiz Quiz { get; set; }
     public User User { get; set; }

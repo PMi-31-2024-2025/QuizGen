@@ -8,6 +8,9 @@ using QuizGen.BLL.Models.Quiz;
 using System.Threading.Tasks;
 using System.Linq;
 using QuizGen.BLL.Models.Base;
+using QuizGen.Presentation.Views.Windows;
+using Windows.Storage.Pickers;
+using Windows.Storage;
 
 namespace QuizGen.Presentation.Views.Pages;
 
@@ -124,14 +127,22 @@ public sealed partial class MyQuizzesPage : Page
 
     private async void StartQuizButton_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new ContentDialog
+        if (sender is Button button && button.Tag is int quizId)
         {
-            Title = "Coming Soon",
-            Content = "Quiz taking functionality will be implemented in a future update.",
-            CloseButtonText = "OK",
-            XamlRoot = this.XamlRoot
-        };
-        await dialog.ShowAsync();
+            try
+            {
+                var quizWindow = new QuizWindow(quizId);
+                quizWindow.Closed += async (s, e) => 
+                {
+                    await LoadQuizzes(); // Refresh list to show updated scores
+                };
+                quizWindow.Activate();
+            }
+            catch (Exception ex)
+            {
+                await ShowError("Failed to start quiz", ex.Message);
+            }
+        }
     }
 
     private async void ExportQuizButton_Click(object sender, RoutedEventArgs e)
@@ -181,9 +192,9 @@ public sealed partial class MyQuizzesPage : Page
                 defaultFileName += isPdf ? ".pdf" : ".txt";
 
                 // Show file picker
-                var savePicker = new Windows.Storage.Pickers.FileSavePicker
+                var savePicker = new FileSavePicker
                 {
-                    SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary,
+                    SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
                     SuggestedFileName = defaultFileName
                 };
 
@@ -209,7 +220,7 @@ public sealed partial class MyQuizzesPage : Page
 
                         if (exportResult.Success)
                         {
-                            await Windows.Storage.FileIO.WriteBytesAsync(file, exportResult.Data);
+                            await FileIO.WriteBytesAsync(file, exportResult.Data);
                             MainWindow.Instance.ShowToast("Quiz exported successfully!");
                         }
                         else
