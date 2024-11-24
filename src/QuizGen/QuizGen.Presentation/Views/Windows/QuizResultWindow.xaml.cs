@@ -1,13 +1,12 @@
+using Microsoft.UI.Text;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using QuizGen.BLL.Models.QuizTry;
-using System;
-using Windows.UI;
-using Microsoft.UI.Text;
-using Microsoft.UI.Windowing;
-using Windows.Graphics;
 using QuizGen.Presentation.Helpers;
+using Windows.Graphics;
+using Windows.UI;
 
 namespace QuizGen.Presentation.Views.Windows;
 
@@ -65,13 +64,13 @@ public sealed partial class QuizResultWindow : Window
         // Update score display
         ScoreRing.Value = result.Score;
         ScoreRing.Foreground = new SolidColorBrush(
-            result.Score >= 50 
+            result.Score >= 50
                 ? Color.FromArgb(255, 78, 175, 74)
                 : Color.FromArgb(255, 249, 82, 82));
-        
+
         ScorePercentText.Text = $"{result.Score:F0}%";
         ScoreResultText.Text = result.Score >= 50 ? "Quiz Passed" : "Quiz Failed";
-        
+
         // Display question review
         foreach (var question in result.Questions)
         {
@@ -95,7 +94,7 @@ public sealed partial class QuizResultWindow : Window
             {
                 Glyph = question.IsCorrect ? "\uE73E" : "\uE711",
                 Foreground = new SolidColorBrush(
-                    question.IsCorrect 
+                    question.IsCorrect
                         ? Color.FromArgb(255, 78, 175, 74)
                         : Color.FromArgb(255, 249, 82, 82)),
                 FontSize = 20,
@@ -116,7 +115,7 @@ public sealed partial class QuizResultWindow : Window
             {
                 Text = $"+{question.Score:F1}% to total score ({question.CorrectPercentage:F1}% correct)",
                 Foreground = new SolidColorBrush(
-                    question.Score > 0 
+                    question.Score > 0
                         ? Color.FromArgb(180, 78, 175, 74)
                         : Color.FromArgb(180, 255, 255, 255)),
                 Style = Application.Current.Resources["CaptionTextBlockStyle"] as Style,
@@ -133,18 +132,18 @@ public sealed partial class QuizResultWindow : Window
             questionPanel.Children.Add(headerPanel);
 
             // Add answers review
-            var answersPanel = new StackPanel 
-            { 
-                Spacing = 8, 
+            var answersPanel = new StackPanel
+            {
+                Spacing = 8,
                 Margin = new Thickness(32, 8, 0, 0)
             };
 
             foreach (var answer in question.Answers)
             {
-                var answerStackPanel = new StackPanel 
-                { 
+                var answerStackPanel = new StackPanel
+                {
                     Orientation = Orientation.Horizontal,
-                    Spacing = 8 
+                    Spacing = 8
                 };
 
                 var answerText = new TextBlock
@@ -152,7 +151,7 @@ public sealed partial class QuizResultWindow : Window
                     Text = answer.Text,
                     TextWrapping = TextWrapping.Wrap,
                     Foreground = new SolidColorBrush(
-                        answer.IsCorrect ? Color.FromArgb(255, 78, 175, 74) : 
+                        answer.IsCorrect ? Color.FromArgb(255, 78, 175, 74) :
                         Color.FromArgb(255, 128, 128, 128)),
                     Style = Application.Current.Resources["BodyTextBlockStyle"] as Style
                 };
@@ -179,19 +178,19 @@ public sealed partial class QuizResultWindow : Window
             // Add explanation if available
             if (!string.IsNullOrEmpty(question.Explanation))
             {
-                var explanationPanel = new StackPanel 
-                { 
+                var explanationPanel = new StackPanel
+                {
                     Spacing = 4,
                     Margin = new Thickness(32, 8, 0, 0)
                 };
-                
+
                 explanationPanel.Children.Add(new TextBlock
                 {
                     Text = "Explanation:",
                     FontWeight = FontWeights.SemiBold,
                     Style = Application.Current.Resources["CaptionTextBlockStyle"] as Style
                 });
-                
+
                 explanationPanel.Children.Add(new TextBlock
                 {
                     Text = question.Explanation,
@@ -199,7 +198,7 @@ public sealed partial class QuizResultWindow : Window
                     Style = Application.Current.Resources["CaptionTextBlockStyle"] as Style,
                     Opacity = 0.8
                 });
-                
+
                 questionPanel.Children.Add(explanationPanel);
             }
 
@@ -218,4 +217,4 @@ public sealed partial class QuizResultWindow : Window
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
         return AppWindow.GetFromWindowId(windowId);
     }
-} 
+}

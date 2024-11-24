@@ -11,4 +11,4 @@ public class QuizDto
     public int NumQuestions { get; set; }
     public string[] AllowedTypes { get; set; }
     public DateTime CreatedAt { get; set; }
-} 
+}

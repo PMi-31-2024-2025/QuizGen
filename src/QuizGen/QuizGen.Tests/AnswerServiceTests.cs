@@ -32,9 +32,9 @@ public class AnswerServiceTests
             UpdatedAt = DateTime.UtcNow
         };
 
-        _mockQuestionRepository.Setup(repo => repo.GetByIdAsync(questionId))
-            .ReturnsAsync(new Question { Id = questionId,QuizId=1,Text="Sample text",Type="ads" });
-        _mockAnswerRepository.Setup(repo => repo.AddAsync(It.IsAny<Answer>()))
+        _ = _mockQuestionRepository.Setup(repo => repo.GetByIdAsync(questionId))
+            .ReturnsAsync(new Question { Id = questionId, QuizId = 1, Text = "Sample text", Type = "ads" });
+        _ = _mockAnswerRepository.Setup(repo => repo.AddAsync(It.IsAny<Answer>()))
             .ReturnsAsync(answer);
 
         var result = await _answerService.CreateAnswerAsync(questionId, text, isCorrect);
@@ -53,7 +53,7 @@ public class AnswerServiceTests
         var text = "Sample Answer";
         var isCorrect = true;
 
-        _mockQuestionRepository.Setup(repo => repo.GetByIdAsync(questionId))
+        _ = _mockQuestionRepository.Setup(repo => repo.GetByIdAsync(questionId))
             .ReturnsAsync((Question)null);
 
         var result = await _answerService.CreateAnswerAsync(questionId, text, isCorrect);
@@ -78,7 +78,7 @@ public class AnswerServiceTests
             CreatedAt = DateTime.UtcNow
         };
 
-        _mockAnswerRepository.Setup(repo => repo.GetByIdAsync(answerId))
+        _ = _mockAnswerRepository.Setup(repo => repo.GetByIdAsync(answerId))
             .ReturnsAsync(answer);
 
         var result = await _answerService.GetAnswerByIdAsync(answerId);
@@ -94,7 +94,7 @@ public class AnswerServiceTests
     {
         var answerId = 999;
 
-        _mockAnswerRepository.Setup(repo => repo.GetByIdAsync(answerId))
+        _ = _mockAnswerRepository.Setup(repo => repo.GetByIdAsync(answerId))
             .ReturnsAsync((Answer)null);
 
         var result = await _answerService.GetAnswerByIdAsync(answerId);
@@ -115,7 +115,7 @@ public class AnswerServiceTests
             new Answer { Id = 2, QuestionId = questionId, Text = "Answer 2", IsCorrect = false }
         };
 
-        _mockAnswerRepository.Setup(repo => repo.GetByQuestionIdAsync(questionId))
+        _ = _mockAnswerRepository.Setup(repo => repo.GetByQuestionIdAsync(questionId))
             .ReturnsAsync(answers);
 
         var result = await _answerService.GetAnswersByQuestionAsync(questionId);
@@ -135,14 +135,14 @@ public class AnswerServiceTests
             new Answer { Id = 1, QuestionId = questionId, Text = "Correct Answer", IsCorrect = true }
         };
 
-        _mockAnswerRepository.Setup(repo => repo.GetCorrectAnswersByQuestionIdAsync(questionId))
+        _ = _mockAnswerRepository.Setup(repo => repo.GetCorrectAnswersByQuestionIdAsync(questionId))
             .ReturnsAsync(answers);
 
         var result = await _answerService.GetCorrectAnswersByQuestionAsync(questionId);
 
         Assert.NotNull(result);
         Assert.True(result.Success);
-        Assert.Single(result.Data);
+        _ = Assert.Single(result.Data);
         Assert.True(result.Data.First().IsCorrect);
         _mockAnswerRepository.Verify(repo => repo.GetCorrectAnswersByQuestionIdAsync(questionId), Times.Once);
     }

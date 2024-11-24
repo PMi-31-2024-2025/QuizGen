@@ -1,14 +1,14 @@
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Windowing;
-using Windows.Graphics;
-using System;
+using Microsoft.UI.Xaml.Media;
+using QuizGen.Presentation.Helpers;
 using QuizGen.Presentation.Views.Pages;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.UI.Xaml.Media;
+using Windows.Graphics;
 using Windows.UI;
-using QuizGen.Presentation.Helpers;
 
 namespace QuizGen.Presentation.Views.Windows;
 
@@ -23,7 +23,7 @@ public sealed partial class MainWindow : Window
         ServiceProvider = serviceProvider;
         InitializeWindow();
         InitializeToastNotification();
-        
+
         // Navigate to home page by default
         NavigateTo("CreateQuizPage");
     }
@@ -61,7 +61,7 @@ public sealed partial class MainWindow : Window
             if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())
             {
                 this.SystemBackdrop = new Microsoft.UI.Xaml.Media.MicaBackdrop();
-                
+
                 // Enable transparency for titlebar
                 var titleBar = appWindow.TitleBar;
                 titleBar.ExtendsContentIntoTitleBar = true;
@@ -82,7 +82,7 @@ public sealed partial class MainWindow : Window
     {
         if (args.IsSettingsSelected)
         {
-            ContentFrame.Navigate(typeof(SettingsPage));
+            _ = ContentFrame.Navigate(typeof(SettingsPage));
             return;
         }
 
@@ -102,17 +102,17 @@ public sealed partial class MainWindow : Window
         if (menuItem != null)
         {
             NavView.SelectedItem = menuItem;
-            
+
             switch (tag)
             {
                 case "CreateQuizPage":
-                    ContentFrame.Navigate(typeof(CreateQuizPage));
+                    _ = ContentFrame.Navigate(typeof(CreateQuizPage));
                     break;
                 case "MyQuizzesPage":
-                    ContentFrame.Navigate(typeof(MyQuizzesPage));
+                    _ = ContentFrame.Navigate(typeof(MyQuizzesPage));
                     break;
                 case "QuizHistoryPage":
-                    ContentFrame.Navigate(typeof(QuizHistoryPage));
+                    _ = ContentFrame.Navigate(typeof(QuizHistoryPage));
                     break;
             }
         }
@@ -146,7 +146,7 @@ public sealed partial class MainWindow : Window
         _toastNotification.IsOpen = true;
 
         // Auto-hide after 3 seconds
-        DispatcherQueue.TryEnqueue(async () =>
+        _ = DispatcherQueue.TryEnqueue(async () =>
         {
             await Task.Delay(3000);
             _toastNotification.IsOpen = false;

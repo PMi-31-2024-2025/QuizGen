@@ -1,9 +1,9 @@
 namespace QuizGen.DAL.Repositories;
 
+using Microsoft.EntityFrameworkCore;
 using QuizGen.DAL.Context;
 using QuizGen.DAL.Interfaces;
 using QuizGen.DAL.Models;
-using Microsoft.EntityFrameworkCore;
 
 public class QuizTryRepository : BaseRepository<QuizTry>, IQuizTryRepository
 {
@@ -67,9 +67,9 @@ public class QuizTryRepository : BaseRepository<QuizTry>, IQuizTryRepository
             // Delete quiz try
             var quizTry = await _context.QuizTries.FindAsync(quizTryId);
             if (quizTry != null)
-                _context.QuizTries.Remove(quizTry);
+                _ = _context.QuizTries.Remove(quizTry);
 
-            await _context.SaveChangesAsync();
+            _ = await _context.SaveChangesAsync();
             await transaction.CommitAsync();
             return true;
         }
@@ -85,18 +85,18 @@ public class QuizTryRepository : BaseRepository<QuizTry>, IQuizTryRepository
         var existingAnswers = await _context.QuizAnswers
             .Where(qa => qa.QuizTryId == quizTryId && qa.QuestionId == questionId)
             .ToListAsync();
-        
+
         if (existingAnswers.Any())
         {
             _context.QuizAnswers.RemoveRange(existingAnswers);
-            await _context.SaveChangesAsync();
+            _ = await _context.SaveChangesAsync();
         }
     }
 
     public async Task AddAnswerAsync(QuizAnswer answer)
     {
-        await _context.QuizAnswers.AddAsync(answer);
-        await _context.SaveChangesAsync();
+        _ = await _context.QuizAnswers.AddAsync(answer);
+        _ = await _context.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<QuizTry>> GetCompletedQuizTriesByUserAsync(int userId)

@@ -1,5 +1,5 @@
-using QuizGen.BLL.Models.Base;
 using QuizGen.BLL.Models.Answer;
+using QuizGen.BLL.Models.Base;
 using QuizGen.BLL.Services.Interfaces;
 using QuizGen.DAL.Interfaces;
 using QuizGen.DAL.Models;
@@ -98,4 +98,4 @@ public class AnswerService : IAnswerService
             CreatedAt = answer.CreatedAt
         };
     }
-} 
+}

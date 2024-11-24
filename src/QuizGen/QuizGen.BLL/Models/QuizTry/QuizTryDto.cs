@@ -13,4 +13,4 @@ public class QuizTryDto
     public DateTime? FinishedAt { get; set; }
     public ICollection<QuizAnswerDto> Answers { get; set; }
     public DateTime CreatedAt { get; set; }
-} 
+}

@@ -1,5 +1,5 @@
-using QuizGen.BLL.Models.Base;
 using QuizGen.BLL.Models.Answer;
+using QuizGen.BLL.Models.Base;
 
 namespace QuizGen.BLL.Services.Interfaces;
 
@@ -9,4 +9,4 @@ public interface IAnswerService
     Task<ServiceResult<AnswerDto>> GetAnswerByIdAsync(int id);
     Task<ServiceResult<IEnumerable<AnswerDto>>> GetAnswersByQuestionAsync(int questionId);
     Task<ServiceResult<IEnumerable<AnswerDto>>> GetCorrectAnswersByQuestionAsync(int questionId);
-} 
+}

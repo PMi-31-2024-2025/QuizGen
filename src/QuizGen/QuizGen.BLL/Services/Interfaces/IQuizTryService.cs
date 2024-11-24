@@ -17,4 +17,4 @@ public interface IQuizTryService
     Task<ServiceResult<bool>> SaveAnswersAsync(int quizTryId, int questionId, List<int> selectedAnswerIds);
     Task<ServiceResult<QuizTryStatisticsDto>> GetUserStatisticsAsync(int userId);
     Task<ServiceResult<IEnumerable<QuizTryListItemDto>>> GetUserQuizTriesAsync(int userId);
-} 
+}

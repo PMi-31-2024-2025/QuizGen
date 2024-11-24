@@ -1,6 +1,6 @@
 using Microsoft.UI.Xaml;
-using System.Collections.Generic;
 using QuizGen.Presentation.Views.Windows;
+using System.Collections.Generic;
 
 namespace QuizGen.Presentation.Helpers;
 
@@ -22,4 +22,4 @@ public static class WindowHelper
     {
         MainWindow?.Close();
     }
-} 
+}

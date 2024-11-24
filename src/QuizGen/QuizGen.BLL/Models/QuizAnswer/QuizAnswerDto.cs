@@ -10,4 +10,4 @@ public class QuizAnswerDto
     public string AnswerText { get; set; }
     public bool IsCorrect { get; set; }
     public DateTime CreatedAt { get; set; }
-} 
+}

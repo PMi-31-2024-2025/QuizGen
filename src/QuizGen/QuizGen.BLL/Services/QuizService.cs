@@ -49,7 +49,7 @@ public class QuizService : IQuizService
             user.OpenAiApiKey,
             "gpt-4o-mini"
         );
-        
+
         if (!generationResult.Success)
         {
             return ServiceResult<QuizDto>.CreateError(generationResult.Message);
@@ -106,7 +106,7 @@ public class QuizService : IQuizService
                         UpdatedAt = DateTime.UtcNow
                     };
 
-                    await _answerRepository.AddAsync(answer);
+                    _ = await _answerRepository.AddAsync(answer);
                 }
             }
 
@@ -218,4 +218,4 @@ public class QuizService : IQuizService
             CreatedAt = quiz.CreatedAt
         };
     }
-} 
+}

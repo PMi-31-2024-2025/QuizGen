@@ -1,8 +1,8 @@
-using System;
-using System.Runtime.InteropServices;
 using Microsoft.UI.Xaml;
-using WinRT;
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using WinRT;
 
 namespace QuizGen.Presentation.Helpers;
 
@@ -45,7 +45,7 @@ public static class WindowMinSizeHelper
     {
         var hwnd = window.As<IWindowNative>().WindowHandle;
         IntPtr oldWndProc = IntPtr.Zero;
-        
+
         var newProc = new WinProc((hWnd, msg, wParam, lParam) =>
         {
             if (msg == WM_GETMINMAXINFO)
@@ -62,7 +62,7 @@ public static class WindowMinSizeHelper
         });
 
         oldWndProc = SetWindowLongPtr(hwnd, GWLP_WNDPROC, newProc);
-        
+
         // Store the delegate in our dictionary
         _windowProcs[hwnd] = newProc;
     }
@@ -74,4 +74,4 @@ public static class WindowMinSizeHelper
 internal interface IWindowNative
 {
     IntPtr WindowHandle { get; }
-} 
+}

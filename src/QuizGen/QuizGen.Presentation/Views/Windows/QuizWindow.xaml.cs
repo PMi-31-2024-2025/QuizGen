@@ -1,17 +1,15 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using QuizGen.BLL.Models.QuizTry;
 using QuizGen.BLL.Services.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml.Media;
-using Windows.UI;
-using Windows.Graphics;
-using Microsoft.UI.Text;
 using QuizGen.Presentation.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Windows.Graphics;
+using Windows.UI;
 
 namespace QuizGen.Presentation.Views.Windows;
 
@@ -29,11 +27,11 @@ public sealed partial class QuizWindow : Window
     public QuizWindow(int quizId)
     {
         InitializeComponent();
-        
+
         var serviceProvider = ((App)Application.Current).ServiceProvider;
         _quizTryService = serviceProvider.GetRequiredService<IQuizTryService>();
         _authStateService = serviceProvider.GetRequiredService<IAuthStateService>();
-        
+
         _quizId = quizId;
         InitializeWindow();
         LoadQuiz();
@@ -87,7 +85,7 @@ public sealed partial class QuizWindow : Window
         if (!_isFinished && _quizTryId != 0 && !_isClosing)
         {
             args.Handled = true; // Prevent immediate closing
-            
+
             var dialog = new ContentDialog
             {
                 Title = "Quit Quiz?",
@@ -102,7 +100,7 @@ public sealed partial class QuizWindow : Window
             if (result == ContentDialogResult.Primary)
             {
                 _isClosing = true; // Prevent recursive calls
-                await _quizTryService.DeleteQuizTryAsync(_quizTryId);
+                _ = await _quizTryService.DeleteQuizTryAsync(_quizTryId);
                 this.Close();
             }
         }
@@ -115,8 +113,8 @@ public sealed partial class QuizWindow : Window
             LoadingOverlay.Visibility = Visibility.Visible;
 
             var startResult = await _quizTryService.StartQuizTryAsync(
-                _quizId, 
-                _authStateService.CurrentCredentials?.UserId ?? 
+                _quizId,
+                _authStateService.CurrentCredentials?.UserId ??
                     throw new InvalidOperationException("User not authenticated")
             );
 
@@ -124,7 +122,7 @@ public sealed partial class QuizWindow : Window
             {
                 _quizTryId = startResult.Data.Id;
                 var detailsResult = await _quizTryService.GetQuizTryDetailsAsync(_quizTryId);
-                
+
                 if (detailsResult.Success)
                 {
                     _quizDetails = detailsResult.Data;
@@ -159,7 +157,7 @@ public sealed partial class QuizWindow : Window
         QuizPromptText.Text = _quizDetails.QuizPrompt;
         DifficultyValueText.Text = _quizDetails.Difficulty;
         QuestionCountValueText.Text = _quizDetails.TotalQuestions.ToString();
-        
+
         QuizProgress.Value = 0;
         QuizProgress.Maximum = _quizDetails.TotalQuestions;
     }
@@ -178,11 +176,11 @@ public sealed partial class QuizWindow : Window
         {
             _currentQuestionIndex = index;
             var question = _quizDetails.Questions[index];
-            
+
             QuestionText.Text = question.Text;
             QuestionCountText.Text = $"Question {index + 1} of {_quizDetails.TotalQuestions}";
             QuizProgress.Value = index;
-            ProgressText.Text = $"{(index * 100 / _quizDetails.TotalQuestions):F0}%";
+            ProgressText.Text = $"{index * 100 / _quizDetails.TotalQuestions:F0}%";
 
             AnswersPanel.Children.Clear();
 
@@ -263,7 +261,7 @@ public sealed partial class QuizWindow : Window
         }
 
         // Save answers to database
-        await _quizTryService.SaveAnswersAsync(_quizTryId, currentQuestion.Id, selectedAnswerIds);
+        _ = await _quizTryService.SaveAnswersAsync(_quizTryId, currentQuestion.Id, selectedAnswerIds);
     }
 
     private async Task FinishQuiz()
@@ -272,7 +270,7 @@ public sealed partial class QuizWindow : Window
         {
             LoadingOverlay.Visibility = Visibility.Visible;
             var result = await _quizTryService.CalculateAndSaveScoreAsync(_quizTryId);
-            
+
             if (result.Success)
             {
                 _isFinished = true;
@@ -309,7 +307,7 @@ public sealed partial class QuizWindow : Window
             CloseButtonText = "OK",
             XamlRoot = Content.XamlRoot
         };
-        await dialog.ShowAsync();
+        _ = await dialog.ShowAsync();
     }
 
     private AppWindow GetAppWindow()
@@ -322,7 +320,7 @@ public sealed partial class QuizWindow : Window
     private void UpdateNavigationButtons()
     {
         BackButton.IsEnabled = _currentQuestionIndex > 0;
-        
+
         bool hasSelection = false;
         foreach (var child in AnswersPanel.Children)
         {
@@ -339,8 +337,8 @@ public sealed partial class QuizWindow : Window
         }
 
         NextButton.IsEnabled = hasSelection;
-        NextButton.Content = _currentQuestionIndex == _quizDetails.TotalQuestions - 1 
-            ? "Finish Quiz" 
+        NextButton.Content = _currentQuestionIndex == _quizDetails.TotalQuestions - 1
+            ? "Finish Quiz"
             : "Next Question";
     }
-} 
+}

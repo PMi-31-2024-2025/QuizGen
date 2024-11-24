@@ -1,16 +1,15 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using QuizGen.BLL.Models.Base;
+using QuizGen.BLL.Services.Interfaces;
+using QuizGen.Presentation.Views.Windows;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using QuizGen.BLL.Services.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using QuizGen.BLL.Models.QuizTry;
-using QuizGen.Presentation.Views.Windows;
-using Windows.Storage.Pickers;
 using Windows.Storage;
-using QuizGen.BLL.Models.Base;
-using System.Collections.Generic;
+using Windows.Storage.Pickers;
 
 namespace QuizGen.Presentation.Views.Pages;
 
@@ -23,7 +22,7 @@ public sealed partial class QuizHistoryPage : Page
     public QuizHistoryPage()
     {
         InitializeComponent();
-        
+
         var serviceProvider = ((App)Application.Current).ServiceProvider;
         _quizTryService = serviceProvider.GetRequiredService<IQuizTryService>();
         _authStateService = serviceProvider.GetRequiredService<IAuthStateService>();
@@ -37,22 +36,28 @@ public sealed partial class QuizHistoryPage : Page
         await LoadQuizTries();
     }
 
-    private string MapDifficulty(string difficulty) => difficulty switch
+    private string MapDifficulty(string difficulty)
     {
-        "easy" => "Easy",
-        "medium" => "Medium",
-        "hard" => "Hard",
-        "expert" => "Expert",
-        _ => difficulty
-    };
+        return difficulty switch
+        {
+            "easy" => "Easy",
+            "medium" => "Medium",
+            "hard" => "Hard",
+            "expert" => "Expert",
+            _ => difficulty
+        };
+    }
 
-    private string MapQuestionType(string type) => type switch
+    private string MapQuestionType(string type)
     {
-        "single-select" => "Single choice",
-        "multi-select" => "Multiple choice",
-        "true-false" => "True/False",
-        _ => type
-    };
+        return type switch
+        {
+            "single-select" => "Single choice",
+            "multi-select" => "Multiple choice",
+            "true-false" => "True/False",
+            _ => type
+        };
+    }
 
     private string FormatDuration(TimeSpan duration)
     {
@@ -72,7 +77,7 @@ public sealed partial class QuizHistoryPage : Page
     {
         try
         {
-            var userId = _authStateService.CurrentCredentials?.UserId ?? 
+            var userId = _authStateService.CurrentCredentials?.UserId ??
                 throw new InvalidOperationException("User not authenticated");
 
             // Load statistics
@@ -104,8 +109,8 @@ public sealed partial class QuizHistoryPage : Page
                     }).ToList();
 
                 QuizTryList.ItemsSource = sortedTries;
-                EmptyStateMessage.Visibility = !sortedTries.Any() 
-                    ? Visibility.Visible 
+                EmptyStateMessage.Visibility = !sortedTries.Any()
+                    ? Visibility.Visible
                     : Visibility.Collapsed;
             }
             else
@@ -186,7 +191,7 @@ public sealed partial class QuizHistoryPage : Page
         {
             // Create export options panel
             var optionsPanel = new StackPanel { Spacing = 16 };
-            
+
             // Format selection
             var formatPanel = new RadioButtons();
             formatPanel.Header = "Export Format";
@@ -272,6 +277,6 @@ public sealed partial class QuizHistoryPage : Page
             CloseButtonText = "OK",
             XamlRoot = this.XamlRoot
         };
-        await dialog.ShowAsync();
+        _ = await dialog.ShowAsync();
     }
-} 
+}

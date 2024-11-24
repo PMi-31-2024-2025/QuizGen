@@ -1,11 +1,11 @@
-using Microsoft.UI.Xaml;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
 using QuizGen.BLL.Models.Auth;
 using QuizGen.BLL.Services.Interfaces;
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.UI.Windowing;
 using Windows.Graphics;
 using Windows.UI;
 
@@ -51,7 +51,7 @@ public sealed partial class LoginWindow : Window
             if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())
             {
                 this.SystemBackdrop = new Microsoft.UI.Xaml.Media.MicaBackdrop();
-                
+
                 // Enable transparency for titlebar
                 var titleBar = appWindow.TitleBar;
                 titleBar.ExtendsContentIntoTitleBar = true;
@@ -80,7 +80,7 @@ public sealed partial class LoginWindow : Window
         ErrorText.Text = string.Empty;
         try
         {
-            var result = await _authService.LoginAsync(new LoginRequest 
+            var result = await _authService.LoginAsync(new LoginRequest
             {
                 Username = LoginUsernameBox.Text,
                 Password = LoginPasswordBox.Password
@@ -94,7 +94,7 @@ public sealed partial class LoginWindow : Window
                     Username = result.Data.Username,
                     HashedPassword = HashPassword(LoginPasswordBox.Password)
                 };
-                
+
                 _authStateService.SetCredentials(credentials);
                 await _authStateService.SaveStateAsync();
 
@@ -118,7 +118,7 @@ public sealed partial class LoginWindow : Window
     {
         ErrorText.Text = string.Empty;
         RegisterButton.IsEnabled = false;
-        
+
         try
         {
             var result = await _authService.RegisterAsync(new RegisterRequest
@@ -130,7 +130,7 @@ public sealed partial class LoginWindow : Window
 
             if (result.Success)
             {
-                var loginResult = await _authService.LoginAsync(new LoginRequest 
+                var loginResult = await _authService.LoginAsync(new LoginRequest
                 {
                     Username = RegisterUsernameBox.Text,
                     Password = RegisterPasswordBox.Password
@@ -144,7 +144,7 @@ public sealed partial class LoginWindow : Window
                         Username = loginResult.Data.Username,
                         HashedPassword = HashPassword(RegisterPasswordBox.Password)
                     };
-                    
+
                     _authStateService.SetCredentials(credentials);
                     await _authStateService.SaveStateAsync();
 
@@ -196,4 +196,4 @@ public sealed partial class LoginWindow : Window
         LoginForm.Visibility = Visibility.Visible;
         ErrorText.Text = string.Empty;
     }
-} 
+}

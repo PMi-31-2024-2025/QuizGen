@@ -1,10 +1,6 @@
-using System;
-using System.IO;
-using System.Text.Json;
-using System.Threading.Tasks;
 using QuizGen.BLL.Configuration;
-using QuizGen.BLL.Models.Auth;
 using QuizGen.BLL.Services.Interfaces;
+using System.Text.Json;
 
 namespace QuizGen.BLL.Services
 {
@@ -44,10 +40,10 @@ namespace QuizGen.BLL.Services
         {
             var directory = Path.GetDirectoryName(_settingsPath);
             if (!Directory.Exists(directory))
-                Directory.CreateDirectory(directory);
+                _ = Directory.CreateDirectory(directory);
 
             var json = JsonSerializer.Serialize(_currentCredentials);
             await File.WriteAllTextAsync(_settingsPath, json);
         }
     }
-} 
+}

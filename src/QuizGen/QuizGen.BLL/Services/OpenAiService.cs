@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using OpenAI;
 using OpenAI.Chat;
 using QuizGen.BLL.Models.Base;
@@ -12,12 +11,12 @@ public class OpenAiService : IOpenAiService
     }
 
     public async Task<ServiceResult<GeneratedQuiz>> GenerateQuizAsync(
-        QuizGenerationRequest request, 
+        QuizGenerationRequest request,
         string apiKey,
         string model = "gpt-4o-mini")
     {
         var _client = new OpenAIClient(apiKey);
-        
+
         string systemPrompt = """
 You are a professional quiz generator for the QuizGen AI application. Your task is to create educational quizzes that are accurate, engaging, and appropriate for the specified difficulty level. Follow these strict rules:
 

@@ -9,4 +9,4 @@ public interface IQuestionService
     Task<ServiceResult<QuestionDto>> GetQuestionByIdAsync(int id);
     Task<ServiceResult<IEnumerable<QuestionDto>>> GetQuestionsByQuizAsync(int quizId);
     Task<ServiceResult<IEnumerable<QuestionDto>>> GetQuestionsByTypeAsync(string type);
-} 
+}

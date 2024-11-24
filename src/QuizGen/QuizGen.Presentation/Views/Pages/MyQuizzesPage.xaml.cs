@@ -1,16 +1,15 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using QuizGen.BLL.Models.Base;
+using QuizGen.BLL.Services.Interfaces;
+using QuizGen.Presentation.Views.Windows;
 using System;
 using System.Collections.Generic;
-using QuizGen.BLL.Services.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using QuizGen.BLL.Models.Quiz;
-using System.Threading.Tasks;
 using System.Linq;
-using QuizGen.BLL.Models.Base;
-using QuizGen.Presentation.Views.Windows;
-using Windows.Storage.Pickers;
+using System.Threading.Tasks;
 using Windows.Storage;
+using Windows.Storage.Pickers;
 
 namespace QuizGen.Presentation.Views.Pages;
 
@@ -23,7 +22,7 @@ public sealed partial class MyQuizzesPage : Page
     public MyQuizzesPage()
     {
         InitializeComponent();
-        
+
         var serviceProvider = ((App)Application.Current).ServiceProvider;
         _quizService = serviceProvider.GetRequiredService<IQuizService>();
         _authStateService = serviceProvider.GetRequiredService<IAuthStateService>();
@@ -37,29 +36,35 @@ public sealed partial class MyQuizzesPage : Page
         await LoadQuizzes();
     }
 
-    private string MapDifficulty(string difficulty) => difficulty switch
+    private string MapDifficulty(string difficulty)
     {
-        "easy" => "Easy",
-        "medium" => "Medium",
-        "hard" => "Hard",
-        "expert" => "Expert",
-        _ => difficulty
-    };
+        return difficulty switch
+        {
+            "easy" => "Easy",
+            "medium" => "Medium",
+            "hard" => "Hard",
+            "expert" => "Expert",
+            _ => difficulty
+        };
+    }
 
-    private string MapQuestionType(string type) => type switch
+    private string MapQuestionType(string type)
     {
-        "single-select" => "Single choice",
-        "multi-select" => "Multiple choice",
-        "true-false" => "True/False",
-        _ => type
-    };
+        return type switch
+        {
+            "single-select" => "Single choice",
+            "multi-select" => "Multiple choice",
+            "true-false" => "True/False",
+            _ => type
+        };
+    }
 
     private async Task LoadQuizzes()
     {
         try
         {
             var result = await _quizService.GetQuizzesByAuthorAsync(
-                _authStateService.CurrentCredentials?.UserId ?? 
+                _authStateService.CurrentCredentials?.UserId ??
                 throw new InvalidOperationException("User not authenticated"));
 
             if (result.Success)
@@ -78,10 +83,10 @@ public sealed partial class MyQuizzesPage : Page
                     }).ToList();
 
                 QuizList.ItemsSource = sortedQuizzes;
-                
+
                 // Show/hide empty state message based on quiz count
-                EmptyStateMessage.Visibility = !sortedQuizzes.Any() 
-                    ? Visibility.Visible 
+                EmptyStateMessage.Visibility = !sortedQuizzes.Any()
+                    ? Visibility.Visible
                     : Visibility.Collapsed;
             }
             else
@@ -132,7 +137,7 @@ public sealed partial class MyQuizzesPage : Page
             try
             {
                 var quizWindow = new QuizWindow(quizId);
-                quizWindow.Closed += async (s, e) => 
+                quizWindow.Closed += async (s, e) =>
                 {
                     await LoadQuizzes(); // Refresh list to show updated scores
                 };
@@ -151,7 +156,7 @@ public sealed partial class MyQuizzesPage : Page
         {
             // Create export options panel
             var optionsPanel = new StackPanel { Spacing = 16 };
-            
+
             // Format selection
             var formatPanel = new RadioButtons();
             formatPanel.Header = "Export Format";
@@ -161,8 +166,8 @@ public sealed partial class MyQuizzesPage : Page
             optionsPanel.Children.Add(formatPanel);
 
             // Include answers checkbox
-            var includeAnswersCheck = new CheckBox 
-            { 
+            var includeAnswersCheck = new CheckBox
+            {
                 Content = "Include correct answers",
                 IsChecked = false
             };
@@ -246,6 +251,6 @@ public sealed partial class MyQuizzesPage : Page
             CloseButtonText = "OK",
             XamlRoot = this.XamlRoot
         };
-        await dialog.ShowAsync();
+        _ = await dialog.ShowAsync();
     }
 }

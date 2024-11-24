@@ -1,12 +1,12 @@
-﻿using Microsoft.UI.Xaml;
-using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
+using QuestPDF.Infrastructure;
 using QuizGen.BLL.Configuration;
+using QuizGen.BLL.Extensions;
 using QuizGen.BLL.Services.Interfaces;
 using QuizGen.DAL.Extensions;
-using QuizGen.BLL.Extensions;
-using QuestPDF.Infrastructure;
 using QuizGen.Presentation.Views.Windows;
+using System;
 
 namespace QuizGen.Presentation
 {
@@ -28,7 +28,7 @@ namespace QuizGen.Presentation
             var services = new ServiceCollection();
             ConfigureServices(services);
             ServiceProvider = services.BuildServiceProvider();
-            
+
             _authStateService = ServiceProvider.GetRequiredService<IAuthStateService>();
         }
 
@@ -42,8 +42,8 @@ namespace QuizGen.Presentation
                     "QuizGen")
             };
 
-            services.AddDataAccessLayer(config.DatabaseConnectionString);
-            services.AddBusinessLogicLayer(config);
+            _ = services.AddDataAccessLayer(config.DatabaseConnectionString);
+            _ = services.AddBusinessLogicLayer(config);
         }
 
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
@@ -54,7 +54,7 @@ namespace QuizGen.Presentation
             {
                 var authService = ServiceProvider.GetRequiredService<IAuthService>();
                 var result = await authService.AutoLoginAsync(_authStateService.CurrentCredentials!);
-                
+
                 if (result.Success)
                 {
                     m_window = new MainWindow(ServiceProvider);

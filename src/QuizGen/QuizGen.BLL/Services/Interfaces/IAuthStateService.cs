@@ -1,5 +1,3 @@
-using QuizGen.BLL.Models.Auth;
-
 namespace QuizGen.BLL.Services.Interfaces;
 
 public interface IAuthStateService
@@ -10,4 +8,4 @@ public interface IAuthStateService
     void ClearCredentials();
     Task LoadSavedStateAsync();
     Task SaveStateAsync();
-} 
+}

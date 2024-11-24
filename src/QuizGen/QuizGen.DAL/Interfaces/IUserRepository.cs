@@ -1,8 +1,7 @@
 namespace QuizGen.DAL.Interfaces;
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using QuizGen.DAL.Models;
+using System.Threading.Tasks;
 
 public interface IUserRepository : IRepository<User>
 {

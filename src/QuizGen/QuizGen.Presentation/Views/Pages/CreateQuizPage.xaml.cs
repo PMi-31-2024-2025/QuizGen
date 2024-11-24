@@ -1,13 +1,12 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
-using System.Linq;
-using System.Text.Json;
 using QuizGen.BLL.Services.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using QuizGen.Presentation.Views.Windows;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace QuizGen.Presentation.Views.Pages;
 
@@ -20,7 +19,7 @@ public sealed partial class CreateQuizPage : Page
     public CreateQuizPage()
     {
         InitializeComponent();
-        
+
         var serviceProvider = ((App)Application.Current).ServiceProvider;
         _quizService = serviceProvider.GetRequiredService<IQuizService>();
         _authStateService = serviceProvider.GetRequiredService<IAuthStateService>();
@@ -28,7 +27,7 @@ public sealed partial class CreateQuizPage : Page
 
         InitializeDefaultValues();
         UpdateGreeting();
-        
+
         // Add size changed handler
         SizeChanged += CreateQuizPage_SizeChanged;
     }
@@ -37,7 +36,7 @@ public sealed partial class CreateQuizPage : Page
     {
         QuestionCountComboBox.SelectedIndex = 1;  // 6 questions
         DifficultyComboBox.SelectedIndex = 1;     // Medium
-        
+
         // Initialize checkboxes
         SingleChoiceCheckBox.IsChecked = true;
         MultiChoiceCheckBox.IsChecked = true;
@@ -58,7 +57,7 @@ public sealed partial class CreateQuizPage : Page
                     >= 18 and < 22 => "Good evening",
                     _ => "Good night"
                 };
-                
+
                 GreetingText.Text = $"{timeOfDay}, {userResult.Data.Name}";
             }
         }
@@ -67,7 +66,7 @@ public sealed partial class CreateQuizPage : Page
     private void TopicBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         if (GenerateButton == null) return;
-        
+
         var anyTypeSelected = SingleChoiceCheckBox.IsChecked == true ||
                              MultiChoiceCheckBox.IsChecked == true ||
                              TrueFalseCheckBox.IsChecked == true;
@@ -108,7 +107,7 @@ public sealed partial class CreateQuizPage : Page
                 // Reset inputs to default state
                 TopicBox.Text = string.Empty;
                 InitializeDefaultValues();
-                
+
                 // Show success toast and navigate
                 MainWindow.Instance.ShowToast("Quiz generated successfully!");
                 MainWindow.Instance.NavigateTo("MyQuizzesPage");
@@ -123,7 +122,7 @@ public sealed partial class CreateQuizPage : Page
                     XamlRoot = this.XamlRoot
                 };
                 LoadingOverlay.Visibility = Visibility.Collapsed;
-                await dialog.ShowAsync();
+                _ = await dialog.ShowAsync();
             }
         }
         catch (Exception ex)
@@ -136,7 +135,7 @@ public sealed partial class CreateQuizPage : Page
                 XamlRoot = this.XamlRoot
             };
             LoadingOverlay.Visibility = Visibility.Collapsed;
-            await dialog.ShowAsync();
+            _ = await dialog.ShowAsync();
         }
         finally
         {
@@ -173,17 +172,17 @@ public sealed partial class CreateQuizPage : Page
             CloseButtonText = "OK",
             XamlRoot = this.XamlRoot
         };
-        await dialog.ShowAsync();
+        _ = await dialog.ShowAsync();
     }
 
     private void QuestionType_CheckedChanged(object sender, RoutedEventArgs e)
     {
         if (GenerateButton == null) return;
-        
+
         var anyTypeSelected = SingleChoiceCheckBox.IsChecked == true ||
                              MultiChoiceCheckBox.IsChecked == true ||
                              TrueFalseCheckBox.IsChecked == true;
 
         GenerateButton.IsEnabled = !string.IsNullOrWhiteSpace(TopicBox.Text) && anyTypeSelected;
     }
-} 
+}

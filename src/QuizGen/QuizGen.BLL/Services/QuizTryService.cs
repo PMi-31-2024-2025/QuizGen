@@ -1,7 +1,6 @@
 using QuizGen.BLL.Models.Base;
-using QuizGen.BLL.Models.QuizTry;
-using QuizGen.BLL.Models.Answer;
 using QuizGen.BLL.Models.QuizAnswer;
+using QuizGen.BLL.Models.QuizTry;
 using QuizGen.BLL.Services.Interfaces;
 using QuizGen.DAL.Interfaces;
 using QuizGen.DAL.Models;
@@ -147,7 +146,7 @@ public class QuizTryService : IQuizTryService
 
             var questions = await _questionRepository.GetByQuizIdAsync(quizTry.QuizId);
             var answers = await _answerRepository.GetByQuizIdAsync(quizTry.QuizId);
-            
+
             var currentQuestionIndex = quizTry.QuizAnswers.Count;
 
             var dto = new QuizTryDetailsDto
@@ -193,7 +192,7 @@ public class QuizTryService : IQuizTryService
                 return ServiceResult<bool>.CreateError("Quiz try not found");
 
             var result = await _quizTryRepository.DeleteWithAnswersAsync(quizTryId);
-            return result 
+            return result
                 ? ServiceResult<bool>.CreateSuccess(true)
                 : ServiceResult<bool>.CreateError("Failed to delete quiz try");
         }
@@ -213,7 +212,7 @@ public class QuizTryService : IQuizTryService
 
             var questions = await _questionRepository.GetByQuizIdAsync(quizTry.QuizId);
             var answers = await _answerRepository.GetByQuizIdAsync(quizTry.QuizId);
-            
+
             double totalScore = 0;
             var questionResults = new List<QuestionResultDto>();
 
@@ -221,7 +220,7 @@ public class QuizTryService : IQuizTryService
             {
                 var questionAnswers = answers.Where(a => a.QuestionId == question.Id).ToList();
                 var userAnswers = quizTry.QuizAnswers.Where(qa => qa.QuestionId == question.Id).ToList();
-                
+
                 double questionScore = 0;
                 var correctAnswers = questionAnswers.Where(a => a.IsCorrect).ToList();
                 var incorrectAnswers = questionAnswers.Where(a => !a.IsCorrect).ToList();
@@ -231,17 +230,17 @@ public class QuizTryService : IQuizTryService
                     // For multiple select questions
                     int totalCorrectAnswers = correctAnswers.Count;
                     int totalIncorrectAnswers = incorrectAnswers.Count;
-                    
+
                     // Count user's correct and incorrect selections
                     int correctSelections = userAnswers.Count(ua => correctAnswers.Any(ca => ca.Id == ua.AnswerId));
                     int incorrectSelections = userAnswers.Count(ua => incorrectAnswers.Any(ia => ia.Id == ua.AnswerId));
                     int missedCorrectAnswers = totalCorrectAnswers - correctSelections;
-                    
+
                     // Calculate score components
                     double correctScore = totalCorrectAnswers > 0 ? (double)correctSelections / totalCorrectAnswers : 0;
                     double incorrectPenalty = totalIncorrectAnswers > 0 ? (double)incorrectSelections / totalIncorrectAnswers : 0;
                     double missingPenalty = totalCorrectAnswers > 0 ? (double)missedCorrectAnswers / totalCorrectAnswers : 0;
-                    
+
                     // Final score calculation
                     questionScore = Math.Max(0, correctScore - incorrectPenalty - missingPenalty);
                 }
@@ -255,7 +254,7 @@ public class QuizTryService : IQuizTryService
 
                 // Convert to percentage of total quiz score
                 questionScore = Math.Max(0, Math.Min(1, questionScore));
-                double questionPercentage = (1.0 / questions.Count()) * 100;
+                double questionPercentage = 1.0 / questions.Count() * 100;
 
                 totalScore += questionScore;
 
@@ -278,8 +277,8 @@ public class QuizTryService : IQuizTryService
                 });
             }
 
-            var finalScore = (totalScore / questions.Count()) * 100;
-            
+            var finalScore = totalScore / questions.Count() * 100;
+
             quizTry.Score = finalScore;
             quizTry.FinishedAt = DateTime.UtcNow;
             quizTry.UpdatedAt = DateTime.UtcNow;
@@ -341,7 +340,7 @@ public class QuizTryService : IQuizTryService
         try
         {
             var quizTries = await _quizTryRepository.GetCompletedByUserIdAsync(userId);
-            
+
             if (!quizTries.Any())
                 return ServiceResult<QuizTryStatisticsDto>.CreateSuccess(new QuizTryStatisticsDto());
 
@@ -369,7 +368,7 @@ public class QuizTryService : IQuizTryService
         try
         {
             var quizTries = await _quizTryRepository.GetCompletedByUserIdAsync(userId);
-            
+
             var dtos = quizTries
                 .Where(qt => qt.FinishedAt.HasValue)
                 .Select(qt => new QuizTryListItemDto
@@ -422,4 +421,4 @@ public class QuizTryService : IQuizTryService
             }).ToList()
         };
     }
-} 
+}

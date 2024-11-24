@@ -1,9 +1,9 @@
 namespace QuizGen.DAL.Repositories;
 
+using Microsoft.EntityFrameworkCore;
 using QuizGen.DAL.Context;
 using QuizGen.DAL.Interfaces;
 using QuizGen.DAL.Models;
-using Microsoft.EntityFrameworkCore;
 
 public class QuizRepository : BaseRepository<Quiz>, IQuizRepository
 {

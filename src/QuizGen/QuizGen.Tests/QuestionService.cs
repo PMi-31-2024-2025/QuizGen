@@ -1,11 +1,4 @@
 ﻿using Moq;
-using Xunit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using QuizGen.BLL.Models.Base;
-using QuizGen.BLL.Models.Question;
 using QuizGen.BLL.Services;
 using QuizGen.DAL.Interfaces;
 using QuizGen.DAL.Models;
@@ -41,9 +34,9 @@ public class QuestionServiceTests
             UpdatedAt = DateTime.UtcNow
         };
 
-        _mockQuizRepository.Setup(repo => repo.GetByIdAsync(quizId))
-            .ReturnsAsync(new Quiz { Id = quizId, AuthorId=1, Name="Quiz name", Prompt="Cool answer", Difficulty="Hard",NumQuestions=10, AllowedTypes = [] });
-        _mockQuestionRepository.Setup(repo => repo.AddAsync(It.IsAny<Question>()))
+        _ = _mockQuizRepository.Setup(repo => repo.GetByIdAsync(quizId))
+            .ReturnsAsync(new Quiz { Id = quizId, AuthorId = 1, Name = "Quiz name", Prompt = "Cool answer", Difficulty = "Hard", NumQuestions = 10, AllowedTypes = [] });
+        _ = _mockQuestionRepository.Setup(repo => repo.AddAsync(It.IsAny<Question>()))
             .ReturnsAsync(question);
 
         var result = await _questionService.CreateQuestionAsync(quizId, text, type, explanation);
@@ -63,7 +56,7 @@ public class QuestionServiceTests
         var type = "Multiple Choice";
         var explanation = "This is an explanation.";
 
-        _mockQuizRepository.Setup(repo => repo.GetByIdAsync(quizId))
+        _ = _mockQuizRepository.Setup(repo => repo.GetByIdAsync(quizId))
             .ReturnsAsync((Quiz)null);
 
         var result = await _questionService.CreateQuestionAsync(quizId, text, type, explanation);
@@ -89,7 +82,7 @@ public class QuestionServiceTests
             CreatedAt = DateTime.UtcNow
         };
 
-        _mockQuestionRepository.Setup(repo => repo.GetByIdAsync(questionId))
+        _ = _mockQuestionRepository.Setup(repo => repo.GetByIdAsync(questionId))
             .ReturnsAsync(question);
 
 
@@ -108,7 +101,7 @@ public class QuestionServiceTests
 
         var questionId = 999;
 
-        _mockQuestionRepository.Setup(repo => repo.GetByIdAsync(questionId))
+        _ = _mockQuestionRepository.Setup(repo => repo.GetByIdAsync(questionId))
             .ReturnsAsync((Question)null);
 
 
@@ -131,7 +124,7 @@ public class QuestionServiceTests
             new Question { Id = 2, QuizId = quizId, Text = "Question 2",Type="Single select" }
         };
 
-        _mockQuestionRepository.Setup(repo => repo.GetByQuizIdAsync(quizId))
+        _ = _mockQuestionRepository.Setup(repo => repo.GetByQuizIdAsync(quizId))
             .ReturnsAsync(questions);
 
 
@@ -150,7 +143,7 @@ public class QuestionServiceTests
 
         var quizId = 999;
 
-        _mockQuestionRepository.Setup(repo => repo.GetByQuizIdAsync(quizId))
+        _ = _mockQuestionRepository.Setup(repo => repo.GetByQuizIdAsync(quizId))
             .ReturnsAsync(new List<Question>());
 
 
@@ -174,7 +167,7 @@ public class QuestionServiceTests
             new Question { Id = 2, Type = type, Text = "Question 2",QuizId=5 }
         };
 
-        _mockQuestionRepository.Setup(repo => repo.GetByTypeAsync(type))
+        _ = _mockQuestionRepository.Setup(repo => repo.GetByTypeAsync(type))
             .ReturnsAsync(questions);
 
         var result = await _questionService.GetQuestionsByTypeAsync(type);
@@ -192,7 +185,7 @@ public class QuestionServiceTests
 
         var type = "Invalid Type";
 
-        _mockQuestionRepository.Setup(repo => repo.GetByTypeAsync(type))
+        _ = _mockQuestionRepository.Setup(repo => repo.GetByTypeAsync(type))
             .ReturnsAsync(new List<Question>());
 
 

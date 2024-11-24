@@ -8,4 +8,4 @@ public interface IQuizExportService
     Task<ServiceResult<byte[]>> ExportAsTextAsync(int quizId, bool includeAnswers);
     Task<ServiceResult<byte[]>> ExportTryAsPdfAsync(int quizTryId);
     Task<ServiceResult<byte[]>> ExportTryAsTextAsync(int quizTryId);
-} 
+}

@@ -1,12 +1,12 @@
 namespace QuizGen.BLL.Services;
 
-using System.Security.Cryptography;
-using System.Text;
 using QuizGen.BLL.Models.Auth;
 using QuizGen.BLL.Models.Base;
 using QuizGen.BLL.Services.Interfaces;
 using QuizGen.DAL.Interfaces;
 using QuizGen.DAL.Models;
+using System.Security.Cryptography;
+using System.Text;
 
 public class AuthService : IAuthService
 {
@@ -31,7 +31,7 @@ public class AuthService : IAuthService
             return ServiceResult<AuthResult>.CreateError("Invalid username or password");
 
         var authResult = MapToAuthResult(user);
-        
+
         // Store credentials for auto-login
         var credentials = new StoredCredentials
         {
@@ -63,7 +63,7 @@ public class AuthService : IAuthService
                 GptModel = "gpt-4o-mini"
             };
 
-            await _userRepository.AddAsync(user);
+            _ = await _userRepository.AddAsync(user);
             return ServiceResult<AuthResult>.CreateSuccess(MapToAuthResult(user));
         }
         catch (Exception ex)
@@ -107,7 +107,7 @@ public class AuthService : IAuthService
     public async Task<ServiceResult<AuthResult>> AutoLoginAsync(StoredCredentials credentials)
     {
         var user = await _userRepository.GetByIdAsync(credentials.UserId);
-        if (user == null || user.Username != credentials.Username || 
+        if (user == null || user.Username != credentials.Username ||
             user.PasswordHash != credentials.HashedPassword)
         {
             return ServiceResult<AuthResult>.CreateError("Stored credentials are invalid");

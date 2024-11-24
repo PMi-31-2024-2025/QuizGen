@@ -7,4 +7,4 @@ public interface IOpenAiService
         string apiKey,
         string model = "gpt-4o-mini");
     bool IsGenerationFailed(GeneratedQuiz quiz);
-} 
+}

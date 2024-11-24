@@ -1,12 +1,9 @@
 using Moq;
-using Xunit;
-using System.Threading.Tasks;
 using QuizGen.BLL.Models.Auth;
-using QuizGen.BLL.Models.Base;
 using QuizGen.BLL.Services;
+using QuizGen.BLL.Services.Interfaces;
 using QuizGen.DAL.Interfaces;
 using QuizGen.DAL.Models;
-using QuizGen.BLL.Services.Interfaces;
 
 public class AuthServiceTests
 {
@@ -34,7 +31,7 @@ public class AuthServiceTests
                 .ComputeHash(System.Text.Encoding.UTF8.GetBytes("password123")))
         };
 
-        _mockUserRepository.Setup(repo => repo.GetByUsernameAsync(request.Username))
+        _ = _mockUserRepository.Setup(repo => repo.GetByUsernameAsync(request.Username))
             .ReturnsAsync(user);
 
         var result = await _authService.LoginAsync(request);
@@ -50,7 +47,7 @@ public class AuthServiceTests
     public async Task LoginAsync_InvalidUsername_ReturnsError()
     {
         var request = new LoginRequest { Username = "invalidUser", Password = "password123" };
-        _mockUserRepository.Setup(repo => repo.GetByUsernameAsync(request.Username))
+        _ = _mockUserRepository.Setup(repo => repo.GetByUsernameAsync(request.Username))
             .ReturnsAsync((User)null);
 
         var result = await _authService.LoginAsync(request);
@@ -73,7 +70,7 @@ public class AuthServiceTests
                 .ComputeHash(System.Text.Encoding.UTF8.GetBytes("password123")))
         };
 
-        _mockUserRepository.Setup(repo => repo.GetByUsernameAsync(request.Username))
+        _ = _mockUserRepository.Setup(repo => repo.GetByUsernameAsync(request.Username))
             .ReturnsAsync(user);
 
         var result = await _authService.LoginAsync(request);

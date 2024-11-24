@@ -30,4 +30,4 @@ public class AnswerResultDto
     public string Text { get; set; }
     public bool IsCorrect { get; set; }
     public bool WasSelected { get; set; }
-} 
+}

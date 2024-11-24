@@ -1,9 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.Extensions.DependencyInjection;
 using QuizGen.BLL.Services.Interfaces;
-using System;
 using QuizGen.Presentation.Views.Windows;
+using System;
 
 namespace QuizGen.Presentation.Views.Pages;
 
@@ -64,7 +64,7 @@ public sealed partial class SettingsPage : Page
                     CloseButtonText = "OK",
                     XamlRoot = this.XamlRoot
                 };
-                await dialog.ShowAsync();
+                _ = await dialog.ShowAsync();
             }
         }
     }
@@ -76,7 +76,7 @@ public sealed partial class SettingsPage : Page
 
         var loginWindow = new LoginWindow(_serviceProvider);
         loginWindow.Activate();
-        
+
         var mainWindow = App.MainWindow;
         if (mainWindow != null)
         {

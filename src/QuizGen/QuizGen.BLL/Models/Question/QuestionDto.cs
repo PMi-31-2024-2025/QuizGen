@@ -11,4 +11,4 @@ public class QuestionDto
     public string? Explanation { get; set; }
     public DateTime CreatedAt { get; set; }
     public ICollection<AnswerDto> Answers { get; set; }
-} 
+}

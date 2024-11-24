@@ -19,136 +19,136 @@ public class AppDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         // Configure default schema
-        modelBuilder.HasDefaultSchema("public");
+        _ = modelBuilder.HasDefaultSchema("public");
 
         // User configuration
-        modelBuilder.Entity<User>(entity =>
+        _ = modelBuilder.Entity<User>(entity =>
         {
-            entity.ToTable("users");
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.Username).IsUnique();
-            
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
-            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-            entity.Property(e => e.Name).HasColumnName("name").IsRequired();
-            entity.Property(e => e.Username).HasColumnName("username").IsRequired();
-            entity.Property(e => e.PasswordHash).HasColumnName("password_hash").IsRequired();
-            entity.Property(e => e.OpenAiApiKey).HasColumnName("openai_api_key");
-            entity.Property(e => e.GptModel).HasColumnName("gpt_model")
+            _ = entity.ToTable("users");
+            _ = entity.HasKey(e => e.Id);
+            _ = entity.HasIndex(e => e.Username).IsUnique();
+
+            _ = entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            _ = entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            _ = entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            _ = entity.Property(e => e.Name).HasColumnName("name").IsRequired();
+            _ = entity.Property(e => e.Username).HasColumnName("username").IsRequired();
+            _ = entity.Property(e => e.PasswordHash).HasColumnName("password_hash").IsRequired();
+            _ = entity.Property(e => e.OpenAiApiKey).HasColumnName("openai_api_key");
+            _ = entity.Property(e => e.GptModel).HasColumnName("gpt_model")
                 .HasDefaultValue("gpt-4o-mini");
         });
 
         // Quiz configuration
-        modelBuilder.Entity<Quiz>(entity =>
+        _ = modelBuilder.Entity<Quiz>(entity =>
         {
-            entity.ToTable("quizzes");
-            entity.HasKey(e => e.Id);
-            
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
-            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-            entity.Property(e => e.AuthorId).HasColumnName("author_id").IsRequired();
-            entity.Property(e => e.Name).HasColumnName("name").IsRequired();
-            entity.Property(e => e.Prompt).HasColumnName("prompt").IsRequired();
-            entity.Property(e => e.Difficulty).HasColumnName("difficulty").IsRequired();
-            entity.Property(e => e.NumQuestions).HasColumnName("num_questions").IsRequired();
-            entity.Property(e => e.AllowedTypes).HasColumnName("allowed_types").IsRequired();
+            _ = entity.ToTable("quizzes");
+            _ = entity.HasKey(e => e.Id);
 
-            entity.HasOne(q => q.Author)
+            _ = entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            _ = entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            _ = entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            _ = entity.Property(e => e.AuthorId).HasColumnName("author_id").IsRequired();
+            _ = entity.Property(e => e.Name).HasColumnName("name").IsRequired();
+            _ = entity.Property(e => e.Prompt).HasColumnName("prompt").IsRequired();
+            _ = entity.Property(e => e.Difficulty).HasColumnName("difficulty").IsRequired();
+            _ = entity.Property(e => e.NumQuestions).HasColumnName("num_questions").IsRequired();
+            _ = entity.Property(e => e.AllowedTypes).HasColumnName("allowed_types").IsRequired();
+
+            _ = entity.HasOne(q => q.Author)
                   .WithMany(u => u.Quizzes)
                   .HasForeignKey(q => q.AuthorId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Question configuration
-        modelBuilder.Entity<Question>(entity =>
+        _ = modelBuilder.Entity<Question>(entity =>
         {
-            entity.ToTable("questions");
-            entity.HasKey(e => e.Id);
-            
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
-            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-            entity.Property(e => e.QuizId).HasColumnName("quiz_id").IsRequired();
-            entity.Property(e => e.Text).HasColumnName("text").IsRequired();
-            entity.Property(e => e.Type).HasColumnName("type").IsRequired();
-            entity.Property(e => e.Explanation).HasColumnName("explanation");
+            _ = entity.ToTable("questions");
+            _ = entity.HasKey(e => e.Id);
 
-            entity.HasOne(q => q.Quiz)
+            _ = entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            _ = entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            _ = entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            _ = entity.Property(e => e.QuizId).HasColumnName("quiz_id").IsRequired();
+            _ = entity.Property(e => e.Text).HasColumnName("text").IsRequired();
+            _ = entity.Property(e => e.Type).HasColumnName("type").IsRequired();
+            _ = entity.Property(e => e.Explanation).HasColumnName("explanation");
+
+            _ = entity.HasOne(q => q.Quiz)
                   .WithMany(qz => qz.Questions)
                   .HasForeignKey(q => q.QuizId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Answer configuration
-        modelBuilder.Entity<Answer>(entity =>
+        _ = modelBuilder.Entity<Answer>(entity =>
         {
-            entity.ToTable("answers");
-            entity.HasKey(e => e.Id);
-            
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
-            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-            entity.Property(e => e.QuestionId).HasColumnName("question_id").IsRequired();
-            entity.Property(e => e.Text).HasColumnName("text").IsRequired();
-            entity.Property(e => e.IsCorrect).HasColumnName("is_correct").IsRequired();
+            _ = entity.ToTable("answers");
+            _ = entity.HasKey(e => e.Id);
 
-            entity.HasOne(a => a.Question)
+            _ = entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            _ = entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            _ = entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            _ = entity.Property(e => e.QuestionId).HasColumnName("question_id").IsRequired();
+            _ = entity.Property(e => e.Text).HasColumnName("text").IsRequired();
+            _ = entity.Property(e => e.IsCorrect).HasColumnName("is_correct").IsRequired();
+
+            _ = entity.HasOne(a => a.Question)
                   .WithMany(q => q.Answers)
                   .HasForeignKey(a => a.QuestionId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         // QuizTry configuration
-        modelBuilder.Entity<QuizTry>(entity =>
+        _ = modelBuilder.Entity<QuizTry>(entity =>
         {
-            entity.ToTable("quiz_tries");
-            entity.HasKey(e => e.Id);
-            
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
-            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-            entity.Property(e => e.QuizId).HasColumnName("quiz_id").IsRequired();
-            entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired();
-            entity.Property(e => e.StartedAt).HasColumnName("started_at").IsRequired();
-            entity.Property(e => e.FinishedAt).HasColumnName("finished_at");
+            _ = entity.ToTable("quiz_tries");
+            _ = entity.HasKey(e => e.Id);
 
-            entity.HasOne(qt => qt.Quiz)
+            _ = entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            _ = entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            _ = entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            _ = entity.Property(e => e.QuizId).HasColumnName("quiz_id").IsRequired();
+            _ = entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired();
+            _ = entity.Property(e => e.StartedAt).HasColumnName("started_at").IsRequired();
+            _ = entity.Property(e => e.FinishedAt).HasColumnName("finished_at");
+
+            _ = entity.HasOne(qt => qt.Quiz)
                   .WithMany(q => q.QuizTries)
                   .HasForeignKey(qt => qt.QuizId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(qt => qt.User)
+            _ = entity.HasOne(qt => qt.User)
                   .WithMany(u => u.QuizTries)
                   .HasForeignKey(qt => qt.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         // QuizAnswer configuration
-        modelBuilder.Entity<QuizAnswer>(entity =>
+        _ = modelBuilder.Entity<QuizAnswer>(entity =>
         {
-            entity.ToTable("quiz_answers");
-            entity.HasKey(e => e.Id);
-            
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
-            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-            entity.Property(e => e.QuizTryId).HasColumnName("quiz_try_id").IsRequired();
-            entity.Property(e => e.QuestionId).HasColumnName("question_id").IsRequired();
-            entity.Property(e => e.AnswerId).HasColumnName("answer_id").IsRequired();
+            _ = entity.ToTable("quiz_answers");
+            _ = entity.HasKey(e => e.Id);
 
-            entity.HasOne(qa => qa.QuizTry)
+            _ = entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            _ = entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            _ = entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            _ = entity.Property(e => e.QuizTryId).HasColumnName("quiz_try_id").IsRequired();
+            _ = entity.Property(e => e.QuestionId).HasColumnName("question_id").IsRequired();
+            _ = entity.Property(e => e.AnswerId).HasColumnName("answer_id").IsRequired();
+
+            _ = entity.HasOne(qa => qa.QuizTry)
                   .WithMany(qt => qt.QuizAnswers)
                   .HasForeignKey(qa => qa.QuizTryId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(qa => qa.Question)
+            _ = entity.HasOne(qa => qa.Question)
                   .WithMany(q => q.QuizAnswers)
                   .HasForeignKey(qa => qa.QuestionId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(qa => qa.Answer)
+            _ = entity.HasOne(qa => qa.Answer)
                   .WithMany(a => a.QuizAnswers)
                   .HasForeignKey(qa => qa.AnswerId)
                   .OnDelete(DeleteBehavior.Cascade);

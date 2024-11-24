@@ -31,4 +31,4 @@ public class GeneratedOption
 
     [JsonPropertyName("isCorrect")]
     public bool IsCorrect { get; set; }
-} 
+}
