@@ -43,32 +43,44 @@
                                             <Run Text="{Binding Prompt}"/>
                                         </TextBlock>
 
-                                        <TextBlock Opacity="0.7">
-                                            <Run Text="Questions: " FontWeight="SemiBold"/>
-                                            <Run Text="{Binding NumQuestions}"/>
-                                        </TextBlock>
+                                        <Grid ColumnSpacing="16" RowSpacing="4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition MinWidth="240" Width="Auto"/>
+                                                <ColumnDefinition MinWidth="240" Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                        <TextBlock Opacity="0.7">
-                                            <Run Text="Difficulty: " FontWeight="SemiBold"/>
-                                            <Run Text="{Binding Difficulty}"/>
-                                        </TextBlock>
-                                        
-                                        <TextBlock Opacity="0.7">
-                                            <Run Text="Types: " FontWeight="SemiBold"/>
-                                            <Run Text="{Binding QuestionTypes}"/>
-                                        </TextBlock>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
 
-                                        <TextBlock Opacity="0.7">
-                                            <Run Text="Created: " FontWeight="SemiBold"/>
-                                            <Run Text="{Binding CreatedAt, Mode=OneWay}"/>
-                                        </TextBlock>
+                                            <TextBlock Grid.Column="0" Grid.Row="0" Opacity="0.7">
+                                                <Run Text="Questions: " FontWeight="SemiBold"/>
+                                                <Run Text="{Binding NumQuestions}"/>
+                                            </TextBlock>
+
+                                            <TextBlock Grid.Column="1" Grid.Row="0" Opacity="0.7">
+                                                <Run Text="Difficulty: " FontWeight="SemiBold"/>
+                                                <Run Text="{Binding Difficulty}"/>
+                                            </TextBlock>
+
+                                            <TextBlock  Grid.Column="0" Grid.Row="1" Opacity="0.7">
+                                                <Run Text="Types: " FontWeight="SemiBold"/>
+                                                <Run Text="{Binding QuestionTypes}"/>
+                                            </TextBlock>
+
+                                            <TextBlock Grid.Column="1" Grid.Row="1" Opacity="0.7">
+                                                <Run Text="Created: " FontWeight="SemiBold"/>
+                                                <Run Text="{Binding CreatedAt, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </Grid>
                                     </StackPanel>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" 
                                           Orientation="Horizontal" 
                                           Spacing="8"
-                                          VerticalAlignment="Center">
+                                          VerticalAlignment="Bottom">
                                     <Button Content="Start Quiz"
                                             Tag="{Binding Id}"
                                             Click="StartQuizButton_Click"
