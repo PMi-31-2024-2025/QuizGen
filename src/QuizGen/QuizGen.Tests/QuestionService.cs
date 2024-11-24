@@ -42,7 +42,7 @@ public class QuestionServiceTests
         };
 
         _mockQuizRepository.Setup(repo => repo.GetByIdAsync(quizId))
-            .ReturnsAsync(new Quiz { Id = quizId, AuthorId=1,Prompt="Cool answer", Difficulty="Hard",NumQuestions=10, AllowedTypes = [] });
+            .ReturnsAsync(new Quiz { Id = quizId, AuthorId=1, Name="Quiz name", Prompt="Cool answer", Difficulty="Hard",NumQuestions=10, AllowedTypes = [] });
         _mockQuestionRepository.Setup(repo => repo.AddAsync(It.IsAny<Question>()))
             .ReturnsAsync(question);
 
