@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text.Json;
 using QuizGen.BLL.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace QuizGen.Presentation.Views.Pages;
 
@@ -34,7 +36,11 @@ public sealed partial class CreateQuizPage : Page
     {
         QuestionCountComboBox.SelectedIndex = 1;  // 6 questions
         DifficultyComboBox.SelectedIndex = 1;     // Medium
-        QuestionTypeComboBox.SelectedIndex = 0;   // Single Selection
+        
+        // Initialize checkboxes
+        SingleChoiceCheckBox.IsChecked = true;
+        MultiChoiceCheckBox.IsChecked = true;
+        TrueFalseCheckBox.IsChecked = true;
     }
 
     private async void UpdateGreeting()
@@ -59,7 +65,13 @@ public sealed partial class CreateQuizPage : Page
 
     private void TopicBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        GenerateButton.IsEnabled = !string.IsNullOrWhiteSpace(TopicBox.Text);
+        if (GenerateButton == null) return;
+        
+        var anyTypeSelected = SingleChoiceCheckBox.IsChecked == true ||
+                             MultiChoiceCheckBox.IsChecked == true ||
+                             TrueFalseCheckBox.IsChecked == true;
+
+        GenerateButton.IsEnabled = !string.IsNullOrWhiteSpace(TopicBox.Text) && anyTypeSelected;
     }
 
     private async void GenerateButton_Click(object sender, RoutedEventArgs e)
@@ -71,20 +83,23 @@ public sealed partial class CreateQuizPage : Page
         {
             var questionCount = int.Parse(((ComboBoxItem)QuestionCountComboBox.SelectedItem).Content.ToString().Split(' ')[0]);
             var difficulty = ((ComboBoxItem)DifficultyComboBox.SelectedItem).Content.ToString().Split(' ')[0].ToLower();
-            var questionType = ((ComboBoxItem)QuestionTypeComboBox.SelectedItem).Content.ToString() switch
+            var questionTypes = new List<string>();
+            if (SingleChoiceCheckBox.IsChecked == true) questionTypes.Add("single-select");
+            if (MultiChoiceCheckBox.IsChecked == true) questionTypes.Add("multi-select");
+            if (TrueFalseCheckBox.IsChecked == true) questionTypes.Add("true-false");
+
+            if (!questionTypes.Any())
             {
-                "Single choice questions" => "single-select",
-                "Multiple choice questions" => "multi-select",
-                "True/False questions" => "true-false",
-                _ => throw new ArgumentException("Invalid question type")
-            };
+                await ShowError("Invalid Selection", "Please select at least one question type");
+                return;
+            }
 
             var result = await _quizService.CreateQuizAsync(
                 _authStateService.CurrentCredentials?.UserId ?? throw new InvalidOperationException("User not authenticated"),
                 TopicBox.Text,
                 difficulty,
                 questionCount,
-                new[] { questionType }
+                questionTypes.ToArray()
             );
 
             if (result.Success)
@@ -102,7 +117,7 @@ public sealed partial class CreateQuizPage : Page
                 var dialog = new ContentDialog
                 {
                     Title = "Something went wrong!",
-                    Content = $"Quiz generation failed. Check your prompt and try again. {result.Message}",
+                    Content = "Quiz generation failed. Check your prompt and try again.",
                     CloseButtonText = "OK",
                     XamlRoot = this.XamlRoot
                 };
@@ -133,45 +148,41 @@ public sealed partial class CreateQuizPage : Page
     {
         if (ControlsGrid == null) return;
 
-        // If width is less than 700px, switch to vertical layout
+        // If width is less than 700px, adjust margins and spacing
         if (ActualWidth < 700)
         {
-            Grid.SetRow(QuestionCountComboBox, 0);
-            Grid.SetColumn(QuestionCountComboBox, 0);
-            Grid.SetRow(DifficultyComboBox, 1);
-            Grid.SetColumn(DifficultyComboBox, 0);
-            Grid.SetRow(QuestionTypeComboBox, 2);
-            Grid.SetColumn(QuestionTypeComboBox, 0);
-
-            ControlsGrid.RowDefinitions.Clear();
-            ControlsGrid.ColumnDefinitions.Clear();
-            ControlsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            ControlsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            ControlsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            ControlsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
+            ControlsGrid.RowSpacing = 8;
             QuestionCountComboBox.Margin = new Thickness(0, 0, 0, 8);
-            DifficultyComboBox.Margin = new Thickness(0, 0, 0, 8);
-            QuestionTypeComboBox.Margin = new Thickness(0);
+            DifficultyComboBox.Margin = new Thickness(0);
         }
         else
         {
-            Grid.SetRow(QuestionCountComboBox, 0);
-            Grid.SetColumn(QuestionCountComboBox, 0);
-            Grid.SetRow(DifficultyComboBox, 0);
-            Grid.SetColumn(DifficultyComboBox, 1);
-            Grid.SetRow(QuestionTypeComboBox, 0);
-            Grid.SetColumn(QuestionTypeComboBox, 2);
-
-            ControlsGrid.RowDefinitions.Clear();
-            ControlsGrid.ColumnDefinitions.Clear();
-            ControlsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            ControlsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            ControlsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
+            ControlsGrid.RowSpacing = 16;
             QuestionCountComboBox.Margin = new Thickness(0, 0, 8, 0);
-            DifficultyComboBox.Margin = new Thickness(8, 0, 8, 0);
-            QuestionTypeComboBox.Margin = new Thickness(8, 0, 0, 0);
+            DifficultyComboBox.Margin = new Thickness(8, 0, 0, 0);
         }
+    }
+
+    private async Task ShowError(string title, string message)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = message,
+            CloseButtonText = "OK",
+            XamlRoot = this.XamlRoot
+        };
+        await dialog.ShowAsync();
+    }
+
+    private void QuestionType_CheckedChanged(object sender, RoutedEventArgs e)
+    {
+        if (GenerateButton == null) return;
+        
+        var anyTypeSelected = SingleChoiceCheckBox.IsChecked == true ||
+                             MultiChoiceCheckBox.IsChecked == true ||
+                             TrueFalseCheckBox.IsChecked == true;
+
+        GenerateButton.IsEnabled = !string.IsNullOrWhiteSpace(TopicBox.Text) && anyTypeSelected;
     }
 } 

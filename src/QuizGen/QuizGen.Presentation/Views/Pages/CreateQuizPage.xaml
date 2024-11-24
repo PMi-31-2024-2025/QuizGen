@@ -30,41 +30,72 @@
                             TextChanged="TopicBox_TextChanged"/>
 
                     <!-- Controls Grid with Adaptive Layout -->
-                    <Grid x:Name="ControlsGrid">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                    <Grid x:Name="ControlsGrid" RowSpacing="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
                         
-                        <ComboBox Grid.Column="0" 
-                                 x:Name="QuestionCountComboBox"
-                                 HorizontalAlignment="Stretch"
-                                 Width="190">
-                            <ComboBoxItem Content="3 questions"/>
-                            <ComboBoxItem Content="6 questions"/>
-                            <ComboBoxItem Content="9 questions"/>
-                            <ComboBoxItem Content="12 questions"/>
-                        </ComboBox>
+                        <!-- Comboboxes Row -->
+                        <Grid Grid.Row="0" ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <ComboBox Grid.Column="0" 
+                                     x:Name="QuestionCountComboBox"
+                                     HorizontalAlignment="Stretch"
+                                     Width="250">
+                                <ComboBoxItem Content="3 questions"/>
+                                <ComboBoxItem Content="6 questions"/>
+                                <ComboBoxItem Content="9 questions"/>
+                                <ComboBoxItem Content="12 questions"/>
+                            </ComboBox>
 
-                        <ComboBox Grid.Column="1" 
-                                 x:Name="DifficultyComboBox"
-                                 HorizontalAlignment="Stretch"
-                                 Width="190">
-                            <ComboBoxItem Content="Easy difficulty"/>
-                            <ComboBoxItem Content="Medium difficulty"/>
-                            <ComboBoxItem Content="Hard difficulty"/>
-                            <ComboBoxItem Content="Expert difficulty"/>
-                        </ComboBox>
+                            <ComboBox Grid.Column="1" 
+                                     x:Name="DifficultyComboBox"
+                                     HorizontalAlignment="Stretch"
+                                     Width="250">
+                                <ComboBoxItem Content="Easy difficulty"/>
+                                <ComboBoxItem Content="Medium difficulty"/>
+                                <ComboBoxItem Content="Hard difficulty"/>
+                                <ComboBoxItem Content="Expert difficulty"/>
+                            </ComboBox>
+                        </Grid>
 
-                        <ComboBox Grid.Column="2" 
-                                 x:Name="QuestionTypeComboBox"
-                                 HorizontalAlignment="Stretch"
-                                 Width="190">
-                            <ComboBoxItem Content="Single choice questions"/>
-                            <ComboBoxItem Content="Multiple choice questions"/>
-                            <ComboBoxItem Content="True/False questions"/>
-                        </ComboBox>
+                        <!-- Question Types Row -->
+                        <Grid Grid.Row="1" ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <CheckBox Grid.Column="0" 
+                                     x:Name="SingleChoiceCheckBox"
+                                     Content="Single choice"
+                                     IsChecked="True"
+                                     Checked="QuestionType_CheckedChanged"
+                                     Unchecked="QuestionType_CheckedChanged"
+                                     HorizontalAlignment="Center"/>
+
+                            <CheckBox Grid.Column="1" 
+                                     x:Name="MultiChoiceCheckBox"
+                                     Content="Multiple choice"
+                                     IsChecked="True"
+                                     Checked="QuestionType_CheckedChanged"
+                                     Unchecked="QuestionType_CheckedChanged"
+                                     HorizontalAlignment="Center"/>
+
+                            <CheckBox Grid.Column="2" 
+                                     x:Name="TrueFalseCheckBox"
+                                     Content="True/False"
+                                     IsChecked="True"
+                                     Checked="QuestionType_CheckedChanged"
+                                     Unchecked="QuestionType_CheckedChanged"
+                                     HorizontalAlignment="Center"/>
+                        </Grid>
                     </Grid>
 
                     <!-- Generate Button -->

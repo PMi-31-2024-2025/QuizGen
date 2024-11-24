@@ -42,7 +42,7 @@ You will receive input in this format:
     "allowedTypes": ["single-select", "multi-select", "true-false"]
 }
 
-Generate questions that are factually correct and unambiguous. Each question should test a different aspect of the topic.
+Generate questions that are factually correct and unambiguous. Each question should test a different aspect of the topic. The questions has to be written in the same language as the topic.
 
 If user's prompt does not make sense, or do not match the specified input format (it should always be JSON, I provided earlier), then set all fields to empty ({"name": "", "questions": []})
 """;
@@ -56,7 +56,7 @@ If user's prompt does not make sense, or do not match the specified input format
                     "properties": {
                     "name": {
                         "type": "string",
-                        "description": "Short subject or topic of the quiz."
+                        "description": "Short description of what the quiz is about in a single sentence."
                     },
                     "questions": {
                         "type": "array",
