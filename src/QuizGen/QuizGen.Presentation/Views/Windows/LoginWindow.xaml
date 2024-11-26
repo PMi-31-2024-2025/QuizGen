@@ -11,7 +11,7 @@
                     MaxHeight="600">
             <!-- Logo/Title -->
             <StackPanel HorizontalAlignment="Center" Spacing="8">
-                <FontIcon Glyph="&#xE7BE;" FontSize="32"/>
+                <FontIcon Glyph="&#xE7BE;" FontSize="48"/>
                 <TextBlock Text="QuizGen"
                          Style="{StaticResource TitleTextBlockStyle}"
                          HorizontalAlignment="Center"/>

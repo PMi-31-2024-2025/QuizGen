@@ -34,7 +34,7 @@ public sealed partial class LoginWindow : Window
             appWindow.SetPresenter(AppWindowPresenterKind.Default);
 
             // Set fixed size and disable resizing
-            appWindow.Resize(new SizeInt32(400, 600));
+            appWindow.Resize(new SizeInt32(800, 1200));
             var overlappedPresenter = appWindow.Presenter as OverlappedPresenter;
             if (overlappedPresenter != null)
             {
@@ -44,8 +44,8 @@ public sealed partial class LoginWindow : Window
 
             // Center on screen
             var displayArea = DisplayArea.GetFromWindowId(appWindow.Id, DisplayAreaFallback.Primary);
-            var x = (displayArea.OuterBounds.Width - 400) / 2;
-            var y = (displayArea.OuterBounds.Height - 600) / 2;
+            var x = (displayArea.OuterBounds.Width - 800) / 2;
+            var y = (displayArea.OuterBounds.Height - 1200) / 2;
             appWindow.Move(new PointInt32(x, y));
 
             if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())
