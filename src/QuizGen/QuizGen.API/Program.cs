@@ -1,5 +1,7 @@
 using QuizGen.BLL.Configuration;
 using QuizGen.BLL.Extensions;
+using QuizGen.BLL.Services;
+using QuizGen.BLL.Services.Interfaces;
 using QuizGen.DAL.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +33,12 @@ var appConfig = new AppConfig
 // Add BLL and DAL services
 builder.Services.AddBusinessLogicLayer(appConfig);
 builder.Services.AddDataAccessLayer(appConfig.DatabaseConnectionString);
+
+// Register services
+builder.Services.AddScoped<IQuizService, QuizService>();
+builder.Services.AddScoped<IQuizTryService, QuizTryService>();
+builder.Services.AddScoped<IQuizAnswerService, QuizAnswerService>();
+builder.Services.AddScoped<IOpenAiService, OpenAiService>();
 
 var app = builder.Build();
 
