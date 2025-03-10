@@ -1,3 +1,4 @@
+using QuestPDF.Infrastructure;
 using QuizGen.BLL.Configuration;
 using QuizGen.BLL.Extensions;
 using QuizGen.BLL.Services;
@@ -5,6 +6,9 @@ using QuizGen.BLL.Services.Interfaces;
 using QuizGen.DAL.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure QuestPDF
+QuestPDF.Settings.License = LicenseType.Community;
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -39,6 +43,7 @@ builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IQuizTryService, QuizTryService>();
 builder.Services.AddScoped<IQuizAnswerService, QuizAnswerService>();
 builder.Services.AddScoped<IOpenAiService, OpenAiService>();
+builder.Services.AddScoped<IQuizExportService, QuizExportService>();
 
 var app = builder.Build();
 
