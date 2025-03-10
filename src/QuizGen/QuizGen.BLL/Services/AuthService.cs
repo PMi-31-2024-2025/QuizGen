@@ -11,12 +11,12 @@ using System.Text;
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
-    private readonly IAuthStateService _authStateService;
+    //private readonly IAuthStateService _authStateService;
 
     public AuthService(IUserRepository userRepository, IAuthStateService authStateService)
     {
         _userRepository = userRepository;
-        _authStateService = authStateService;
+        //_authStateService = authStateService;
     }
 
     public async Task<ServiceResult<AuthResult>> LoginAsync(LoginRequest request)
@@ -39,8 +39,8 @@ public class AuthService : IAuthService
             Username = user.Username,
             HashedPassword = user.PasswordHash
         };
-        _authStateService.SetCredentials(credentials);
-        await _authStateService.SaveStateAsync();
+        //_authStateService.SetCredentials(credentials);
+        //await _authStateService.SaveStateAsync();
 
         return ServiceResult<AuthResult>.CreateSuccess(authResult);
     }
