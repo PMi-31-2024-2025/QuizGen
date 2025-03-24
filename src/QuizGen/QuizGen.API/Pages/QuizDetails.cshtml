@@ -1,0 +1,219 @@
+@page "{QuizId:int}"
+@model QuizDetailsModel
+@{
+    ViewData["Title"] = Model.Quiz?.Name ?? "Quiz Details";
+}
+
+<div class="container">
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">
+            @Model.ErrorMessage
+        </div>
+        <a href="/QuizList" class="btn btn-primary mt-3">
+            <i class="bi bi-arrow-left"></i> Back to My Quizzes
+        </a>
+    }
+
+    @if (Model.Quiz != null)
+    {
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1>@Model.Quiz.Name</h1>
+                <p class="text-muted">@Model.Quiz.Prompt</p>
+                <div class="d-flex align-items-center mb-3">
+                    <span class="badge bg-primary me-2">@Model.Quiz.Difficulty</span>
+                    <span class="badge bg-secondary me-2">@Model.Quiz.NumQuestions questions</span>
+                    <small class="text-muted">Created on @Model.Quiz.CreatedAt.ToString("MM/dd/yyyy")</small>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" onclick="downloadFile('@Url.Content($"/api/quizzes/{Model.QuizId}/export/pdf")', '@($"quiz-{Model.QuizId}.pdf")')">
+                        <i class="bi bi-file-earmark-pdf"></i> Export Quiz (PDF)
+                    </button>
+                    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="visually-hidden">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button type="button" class="dropdown-item" onclick="downloadFile('@Url.Content($"/api/quizzes/{Model.QuizId}/export/pdf")', '@($"quiz-{Model.QuizId}.pdf")')">
+                                <i class="bi bi-file-earmark-pdf"></i> PDF
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item" onclick="downloadFile('@Url.Content($"/api/quizzes/{Model.QuizId}/export/text")', '@($"quiz-{Model.QuizId}.txt")')">
+                                <i class="bi bi-file-earmark-text"></i> Text
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <a href="/QuizTry/Start/@Model.QuizId" class="btn btn-success ms-2">
+                    <i class="bi bi-play-fill"></i> Start Quiz
+                </a>
+            </div>
+        </div>
+
+        <h2 class="mb-3">Quiz Attempts</h2>
+        
+        @if (Model.QuizTries != null && Model.QuizTries.Any())
+        {
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Started</th>
+                        <th>Finished</th>
+                        <th>Score</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var quizTry in Model.QuizTries.OrderByDescending(x => x.StartedAt))
+                    {
+                        <tr>
+                            <td>@quizTry.Id</td>
+                            <td>@quizTry.StartedAt.ToString("g")</td>
+                            <td>
+                                @if (quizTry.FinishedAt.HasValue)
+                                {
+                                    @quizTry.FinishedAt.Value.ToString("g")
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">In Progress</span>
+                                }
+                            </td>
+                            <td>
+                                @if (quizTry.FinishedAt.HasValue)
+                                {
+                                    // If the quiz try is finished, display the score
+                                    double score = 0;
+                                    
+                                    // Safely check if Answers collection exists and has items
+                                    if (quizTry.Answers != null && quizTry.Answers.Any())
+                                    {
+                                        // Find all correct answers for this quiz
+                                        var correctAnswers = quizTry.Answers.Count(a => a != null && a.IsCorrect);
+                                        var totalAnswers = quizTry.Answers.Count;
+
+                                        // Calculate score as a percentage
+                                        score = totalAnswers > 0 ? (correctAnswers * 100.0 / totalAnswers) : 0;
+                                    }
+                                    
+                                    var scoreClass = score >= 70 ? "text-success" : 
+                                                    (score >= 50 ? "text-warning" : "text-danger");
+
+                                    <span class="@scoreClass">@score.ToString("F1")%</span>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a href="/QuizTry/@quizTry.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    @if (quizTry.FinishedAt.HasValue)
+                                    {
+                                        <div class="dropdown d-inline">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-file-earmark-arrow-down"></i> Export
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li>
+                                                    <button type="button" class="dropdown-item" onclick="downloadFile('@Url.Content($"/api/quizzes/{Model.QuizId}/attempts/{quizTry.Id}/export/pdf")', '@($"quiz-{Model.QuizId}-attempt-{quizTry.Id}.pdf")')">
+                                                        <i class="bi bi-file-earmark-pdf"></i> PDF
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button type="button" class="dropdown-item" onclick="downloadFile('@Url.Content($"/api/quizzes/{Model.QuizId}/attempts/{quizTry.Id}/export/text")', '@($"quiz-{Model.QuizId}-attempt-{quizTry.Id}.txt")')">
+                                                        <i class="bi bi-file-earmark-text"></i> Text
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                No attempts found for this quiz. Click on "Start Quiz" to begin a new attempt.
+            </div>
+        }
+        
+        <div class="mt-4">
+            <a href="/QuizList" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to My Quizzes
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            Quiz not found or you don't have permission to view it.
+        </div>
+        <a href="/QuizList" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Back to My Quizzes
+        </a>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function downloadFile(url, filename) {
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${getCookie('AuthToken')}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = downloadUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                console.error('Error downloading file:', error);
+                alert(`Failed to download the file: ${error.message}`);
+            });
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // Fix table scrolling when modal is opened
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdowns = document.querySelectorAll('.dropdown');
+            dropdowns.forEach(dropdown => {
+                dropdown.addEventListener('show.bs.dropdown', function () {
+                    document.body.style.paddingRight = '0px';
+                });
+            });
+        });
+    </script>
+} 

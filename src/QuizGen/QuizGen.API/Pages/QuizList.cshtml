@@ -1,0 +1,106 @@
+@page
+@model QuizListModel
+@{
+    ViewData["Title"] = "My Quizzes";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Quizzes</h1>
+        <a href="/CreateQuiz" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Create New Quiz
+        </a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    @if (Model.Quizzes != null && Model.Quizzes.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var quiz in Model.Quizzes)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@quiz.Name</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">@quiz.Difficulty</h6>
+                            <p class="card-text">@quiz.Prompt</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">@quiz.NumQuestions questions</span>
+                                <small class="text-muted">Created: @quiz.CreatedAt.ToString("MM/dd/yyyy")</small>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between">
+                                <a href="/QuizDetails/@quiz.Id" class="btn btn-sm btn-primary">View</a>
+                                <a href="/QuizTry/Start/@quiz.Id" class="btn btn-sm btn-success">Start Quiz</a>
+                                <button class="btn btn-sm btn-danger" 
+                                        onclick="confirmDelete(@quiz.Id, '@quiz.Name')">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            You don't have any quizzes yet. Click on "Create New Quiz" to get started!
+        </div>
+        
+        @if (string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Debug Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Debug Info:</strong> @Model.DebugInfo</p>
+                    <p><strong>User ID from cookie:</strong> @(Model.HttpContext.Request.Cookies["UserId"] ?? "Not found")</p>
+                    <p><strong>Environment:</strong> @(Model.HttpContext.RequestServices.GetService<IWebHostEnvironment>()?.EnvironmentName ?? "Unknown")</p>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete "<span id="quizName"></span>"? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post">
+                    <input type="hidden" id="quizIdToDelete" name="quizId" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(quizId, quizName) {
+            document.getElementById('quizIdToDelete').value = quizId;
+            document.getElementById('quizName').innerText = quizName;
+            
+            // Initialize and show the modal
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+    </script>
+} 
