@@ -7,5 +7,6 @@ using System.Threading.Tasks;
 public interface IQuizAnswerRepository : IRepository<QuizAnswer>
 {
     Task<IEnumerable<QuizAnswer>> GetByQuizTryIdAsync(int quizTryId);
+    Task<IEnumerable<QuizAnswer>> GetByQuizTryIdsAsync(IEnumerable<int> quizTryIds);
     Task<IEnumerable<QuizAnswer>> GetByQuestionIdAsync(int questionId);
 }

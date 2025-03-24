@@ -10,4 +10,5 @@ public interface IAuthService
     Task<ServiceResult<AuthResult>> RegisterAsync(RegisterRequest request);
     Task<ServiceResult<bool>> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
     Task<ServiceResult<bool>> UpdateProfileAsync(int userId, string name, string openAiApiKey, string gptModel);
+    Task<ServiceResult<AuthResult>> GetCurrentUserAsync(int userId);
 }

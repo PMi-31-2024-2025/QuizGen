@@ -99,7 +99,24 @@ public class QuizTryService : IQuizTryService
         try
         {
             var quizTries = await _quizTryRepository.GetByUserIdAsync(userId);
-            var dtos = await Task.WhenAll(quizTries.Select(MapToDto));
+            
+            // Load all related data in bulk to avoid multiple queries per entity
+            var quizIds = quizTries.Select(qt => qt.QuizId).Distinct().ToList();
+            var quizzes = await _quizRepository.GetByIdsAsync(quizIds);
+            var quizDict = quizzes.ToDictionary(q => q.Id);
+            
+            var userIds = quizTries.Select(qt => qt.UserId).Distinct().ToList();
+            var users = await _userRepository.GetByIdsAsync(userIds);
+            var userDict = users.ToDictionary(u => u.Id);
+            
+            var quizTryIds = quizTries.Select(qt => qt.Id).ToList();
+            var allAnswers = await _quizAnswerRepository.GetByQuizTryIdsAsync(quizTryIds);
+            var answersDict = allAnswers.GroupBy(a => a.QuizTryId)
+                                       .ToDictionary(g => g.Key, g => g.ToList());
+            
+            // Use the bulk loaded data to create DTOs
+            var dtos = quizTries.Select(qt => MapToDtoWithContext(qt, quizDict, userDict, answersDict)).ToList();
+            
             return ServiceResult<IEnumerable<QuizTryDto>>.CreateSuccess(dtos);
         }
         catch (Exception ex)
@@ -113,7 +130,23 @@ public class QuizTryService : IQuizTryService
         try
         {
             var quizTries = await _quizTryRepository.GetByQuizIdAsync(quizId);
-            var dtos = await Task.WhenAll(quizTries.Select(MapToDto));
+            
+            // Load all related data in bulk to avoid multiple queries per entity
+            var quiz = await _quizRepository.GetByIdAsync(quizId);
+            var quizDict = new Dictionary<int, Quiz> { { quizId, quiz } };
+            
+            var userIds = quizTries.Select(qt => qt.UserId).Distinct().ToList();
+            var users = await _userRepository.GetByIdsAsync(userIds);
+            var userDict = users.ToDictionary(u => u.Id);
+            
+            var quizTryIds = quizTries.Select(qt => qt.Id).ToList();
+            var allAnswers = await _quizAnswerRepository.GetByQuizTryIdsAsync(quizTryIds);
+            var answersDict = allAnswers.GroupBy(a => a.QuizTryId)
+                                       .ToDictionary(g => g.Key, g => g.ToList());
+            
+            // Use the bulk loaded data to create DTOs
+            var dtos = quizTries.Select(qt => MapToDtoWithContext(qt, quizDict, userDict, answersDict)).ToList();
+            
             return ServiceResult<IEnumerable<QuizTryDto>>.CreateSuccess(dtos);
         }
         catch (Exception ex)
@@ -152,6 +185,8 @@ public class QuizTryService : IQuizTryService
             var dto = new QuizTryDetailsDto
             {
                 Id = quizTry.Id,
+                QuizId = quizTry.QuizId,
+                UserId = quizTry.UserId,
                 QuizName = quizTry.Quiz.Name,
                 QuizPrompt = quizTry.Quiz.Prompt,
                 Difficulty = quizTry.Quiz.Difficulty,
@@ -398,6 +433,40 @@ public class QuizTryService : IQuizTryService
         var quiz = await _quizRepository.GetByIdAsync(quizTry.QuizId);
         var user = await _userRepository.GetByIdAsync(quizTry.UserId);
         var answers = await _quizAnswerRepository.GetByQuizTryIdAsync(quizTry.Id);
+
+        return new QuizTryDto
+        {
+            Id = quizTry.Id,
+            QuizId = quizTry.QuizId,
+            UserId = quizTry.UserId,
+            QuizPrompt = quiz?.Prompt ?? "Unknown Quiz",
+            UserName = user?.Name ?? "Unknown User",
+            StartedAt = quizTry.StartedAt,
+            FinishedAt = quizTry.FinishedAt,
+            CreatedAt = quizTry.CreatedAt,
+            Answers = answers.Select(qa => new QuizAnswerDto
+            {
+                Id = qa.Id,
+                QuestionId = qa.QuestionId,
+                AnswerId = qa.AnswerId,
+                QuestionText = qa.Question?.Text ?? "Unknown Question",
+                AnswerText = qa.Answer?.Text ?? "Unknown Answer",
+                IsCorrect = qa.Answer?.IsCorrect ?? false,
+                CreatedAt = qa.CreatedAt
+            }).ToList()
+        };
+    }
+
+    // New method that uses pre-loaded data instead of making individual DB calls
+    private QuizTryDto MapToDtoWithContext(
+        QuizTry quizTry, 
+        Dictionary<int, Quiz> quizDict, 
+        Dictionary<int, User> userDict,
+        Dictionary<int, List<QuizAnswer>> answersDict)
+    {
+        var quiz = quizDict.TryGetValue(quizTry.QuizId, out var q) ? q : null;
+        var user = userDict.TryGetValue(quizTry.UserId, out var u) ? u : null;
+        var answers = answersDict.TryGetValue(quizTry.Id, out var answerList) ? answerList : new List<QuizAnswer>();
 
         return new QuizTryDto
         {

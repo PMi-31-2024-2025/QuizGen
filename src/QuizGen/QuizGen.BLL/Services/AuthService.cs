@@ -1,22 +1,27 @@
 namespace QuizGen.BLL.Services;
 
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using QuizGen.BLL.Models.Auth;
 using QuizGen.BLL.Models.Base;
 using QuizGen.BLL.Services.Interfaces;
 using QuizGen.DAL.Interfaces;
 using QuizGen.DAL.Models;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
-    //private readonly IAuthStateService _authStateService;
+    private readonly IConfiguration _configuration;
 
-    public AuthService(IUserRepository userRepository, IAuthStateService authStateService)
+    public AuthService(IUserRepository userRepository, IAuthStateService authStateService, IConfiguration configuration)
     {
         _userRepository = userRepository;
-        //_authStateService = authStateService;
+        _configuration = configuration;
     }
 
     public async Task<ServiceResult<AuthResult>> LoginAsync(LoginRequest request)
@@ -31,16 +36,9 @@ public class AuthService : IAuthService
             return ServiceResult<AuthResult>.CreateError("Invalid username or password");
 
         var authResult = MapToAuthResult(user);
-
-        // Store credentials for auto-login
-        var credentials = new StoredCredentials
-        {
-            UserId = user.Id,
-            Username = user.Username,
-            HashedPassword = user.PasswordHash
-        };
-        //_authStateService.SetCredentials(credentials);
-        //await _authStateService.SaveStateAsync();
+        
+        // Generate JWT token
+        authResult.AccessToken = GenerateJwtToken(user);
 
         return ServiceResult<AuthResult>.CreateSuccess(authResult);
     }
@@ -64,7 +62,12 @@ public class AuthService : IAuthService
             };
 
             _ = await _userRepository.AddAsync(user);
-            return ServiceResult<AuthResult>.CreateSuccess(MapToAuthResult(user));
+            var authResult = MapToAuthResult(user);
+            
+            // Generate JWT token for new user
+            authResult.AccessToken = GenerateJwtToken(user);
+            
+            return ServiceResult<AuthResult>.CreateSuccess(authResult);
         }
         catch (Exception ex)
         {
@@ -113,7 +116,22 @@ public class AuthService : IAuthService
             return ServiceResult<AuthResult>.CreateError("Stored credentials are invalid");
         }
 
-        return ServiceResult<AuthResult>.CreateSuccess(MapToAuthResult(user));
+        var authResult = MapToAuthResult(user);
+        
+        // Generate JWT token
+        authResult.AccessToken = GenerateJwtToken(user);
+        
+        return ServiceResult<AuthResult>.CreateSuccess(authResult);
+    }
+    
+    public async Task<ServiceResult<AuthResult>> GetCurrentUserAsync(int userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+            return ServiceResult<AuthResult>.CreateError("User not found");
+            
+        var authResult = MapToAuthResult(user);
+        return ServiceResult<AuthResult>.CreateSuccess(authResult);
     }
 
     private string HashPassword(string password)
@@ -133,5 +151,33 @@ public class AuthService : IAuthService
             OpenAiApiKey = user.OpenAiApiKey,
             GptModel = user.GptModel
         };
+    }
+    
+    private string GenerateJwtToken(User user)
+    {
+        var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+        
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim("Name", user.Name)
+        };
+        
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["Jwt:ExpirationMinutes"])),
+            Issuer = _configuration["Jwt:Issuer"],
+            Audience = _configuration["Jwt:Audience"],
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
+        };
+        
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        
+        return tokenHandler.WriteToken(token);
     }
 }

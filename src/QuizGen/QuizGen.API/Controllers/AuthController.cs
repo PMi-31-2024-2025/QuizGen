@@ -1,13 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizGen.BLL.Models.Auth;
 using QuizGen.BLL.Services.Interfaces;
 
 namespace QuizGen.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
         private readonly IAuthService _authService;
 
@@ -17,6 +15,7 @@ namespace QuizGen.API.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var result = await _authService.LoginAsync(request);
@@ -27,6 +26,7 @@ namespace QuizGen.API.Controllers
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             var result = await _authService.RegisterAsync(request);
@@ -36,24 +36,49 @@ namespace QuizGen.API.Controllers
             return Ok(result.Data);
         }
 
-        [HttpPut("users/{userId}/password")]
-        public async Task<IActionResult> ChangePassword(int userId, [FromBody] ChangePasswordRequest request)
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUser()
         {
+            int userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized("Invalid user credentials");
+            
+            var result = await _authService.GetCurrentUserAsync(userId);
+            if (!result.Success)
+                return BadRequest(result.Message);
+                
+            return Ok(result.Data);
+        }
+
+        [HttpPut("password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            int userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized("Invalid user credentials");
+                
             var result = await _authService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
             if (!result.Success)
                 return BadRequest(result.Message);
 
-            return Ok(result.Data);
+            return Ok(new { message = "Password changed successfully" });
         }
 
-        [HttpPut("users/{userId}/profile")]
-        public async Task<IActionResult> UpdateProfile(int userId, [FromBody] UpdateProfileRequest request)
+        [HttpPut("profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
         {
+            int userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized("Invalid user credentials");
+                
             var result = await _authService.UpdateProfileAsync(userId, request.Name, request.OpenAiApiKey, request.GptModel);
             if (!result.Success)
                 return BadRequest(result.Message);
 
-            return Ok(result.Data);
+            return Ok(new { message = "Profile updated successfully" });
         }
     }
 }

@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using QuizGen.DAL.Context;
 using QuizGen.DAL.Interfaces;
 using QuizGen.DAL.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 public class QuizRepository : BaseRepository<Quiz>, IQuizRepository
 {
@@ -33,5 +36,17 @@ public class QuizRepository : BaseRepository<Quiz>, IQuizRepository
             .Include(q => q.Questions)
             .Include(q => q.QuizTries)
             .FirstOrDefaultAsync(q => q.Id == id);
+    }
+    
+    public override async Task<IEnumerable<Quiz>> GetByIdsAsync(IEnumerable<int> ids)
+    {
+        var idsList = ids.ToList();
+        if (!idsList.Any())
+            return new List<Quiz>();
+            
+        return await _dbSet
+            .Where(q => idsList.Contains(q.Id))
+            .Include(q => q.Questions)
+            .ToListAsync();
     }
 }

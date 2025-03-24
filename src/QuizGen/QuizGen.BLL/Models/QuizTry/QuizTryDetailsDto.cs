@@ -3,6 +3,8 @@ namespace QuizGen.BLL.Models.QuizTry;
 public class QuizTryDetailsDto
 {
     public int Id { get; set; }
+    public int QuizId { get; set; }
+    public int UserId { get; set; }
     public string QuizName { get; set; }
     public string QuizPrompt { get; set; }
     public string Difficulty { get; set; }

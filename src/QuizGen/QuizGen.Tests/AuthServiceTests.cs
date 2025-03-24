@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Moq;
 using QuizGen.BLL.Models.Auth;
 using QuizGen.BLL.Services;
@@ -9,13 +10,25 @@ public class AuthServiceTests
 {
     private readonly Mock<IUserRepository> _mockUserRepository;
     private readonly Mock<IAuthStateService> _mockAuthStateService;
+    private readonly Mock<IConfiguration> _mockConfiguration;
     private readonly AuthService _authService;
 
     public AuthServiceTests()
     {
         _mockUserRepository = new Mock<IUserRepository>();
         _mockAuthStateService = new Mock<IAuthStateService>();
-        _authService = new AuthService(_mockUserRepository.Object, _mockAuthStateService.Object);
+        _mockConfiguration = new Mock<IConfiguration>();
+        
+        // Set up configuration mock for JWT token generation
+        _mockConfiguration.Setup(c => c["Jwt:Key"]).Returns("TestSecretKey12345678901234567890");
+        _mockConfiguration.Setup(c => c["Jwt:Issuer"]).Returns("TestIssuer");
+        _mockConfiguration.Setup(c => c["Jwt:Audience"]).Returns("TestAudience");
+        _mockConfiguration.Setup(c => c["Jwt:ExpirationMinutes"]).Returns("60");
+        
+        _authService = new AuthService(
+            _mockUserRepository.Object, 
+            _mockAuthStateService.Object,
+            _mockConfiguration.Object);
     }
 
     [Fact]

@@ -7,4 +7,5 @@ public class AuthResult
     public string Name { get; set; } = string.Empty;
     public string? OpenAiApiKey { get; set; }
     public string GptModel { get; set; } = string.Empty;
+    public string AccessToken { get; set; } = string.Empty;
 }

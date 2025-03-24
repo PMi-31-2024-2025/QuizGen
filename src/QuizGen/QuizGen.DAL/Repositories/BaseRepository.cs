@@ -3,6 +3,7 @@ namespace QuizGen.DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
 using QuizGen.DAL.Context;
 using QuizGen.DAL.Interfaces;
+using System.Linq;
 
 public abstract class BaseRepository<T> : IRepository<T> where T : class
 {
@@ -23,6 +24,21 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
     public virtual async Task<IEnumerable<T>> GetAllAsync()
     {
         return await _dbSet.ToListAsync();
+    }
+    
+    public virtual async Task<IEnumerable<T>> GetByIdsAsync(IEnumerable<int> ids)
+    {
+        // This is a default implementation. For entity types where the primary key has a different name
+        // than 'Id', this method should be overridden in the specific repository class.
+        var idsList = ids.ToList();
+        if (!idsList.Any())
+            return new List<T>();
+            
+        // Note: This is a naive implementation and may not work for all entities.
+        // Specific repositories should override this method based on their entity structures.
+        return await _dbSet.FindAsync(idsList.Select(id => (object)id).ToArray())
+            .AsTask()
+            .ContinueWith(t => t.Result != null ? new List<T> { t.Result } : new List<T>());
     }
 
     public virtual async Task<T> AddAsync(T entity)

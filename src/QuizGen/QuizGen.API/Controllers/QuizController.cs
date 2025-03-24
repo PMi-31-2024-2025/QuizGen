@@ -1,12 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizGen.BLL.Models.Quiz;
 using QuizGen.BLL.Services.Interfaces;
 
 namespace QuizGen.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class QuizController : ControllerBase
+[Authorize]
+public class QuizController : BaseController
 {
     private readonly IQuizService _quizService;
 
@@ -18,8 +18,14 @@ public class QuizController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateQuiz([FromBody] CreateQuizRequest request)
     {
+        // Ensure the user can only create quizzes for themselves
+        int currentUserId = GetCurrentUserId();
+        if (currentUserId == 0)
+            return Unauthorized("Invalid user credentials");
+
+        // Override the AuthorId with the current user's ID for security
         var result = await _quizService.CreateQuizAsync(
-            request.AuthorId,
+            currentUserId,  // Use current user ID instead of request.AuthorId
             request.Topic,
             request.Difficulty,
             request.NumQuestions,
@@ -32,6 +38,20 @@ public class QuizController : ControllerBase
         return CreatedAtAction(nameof(GetQuiz), new { id = result.Data.Id }, result.Data);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetMyQuizzes()
+    {
+        int currentUserId = GetCurrentUserId();
+        if (currentUserId == 0)
+            return Unauthorized("Invalid user credentials");
+
+        var result = await _quizService.GetQuizzesByAuthorAsync(currentUserId);
+        if (!result.Success)
+            return BadRequest(result.Message);
+
+        return Ok(result.Data);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetQuiz(int id)
     {
@@ -39,15 +59,9 @@ public class QuizController : ControllerBase
         if (!result.Success)
             return NotFound(result.Message);
 
-        return Ok(result.Data);
-    }
-
-    [HttpGet("author/{authorId}")]
-    public async Task<IActionResult> GetQuizzesByAuthor(int authorId)
-    {
-        var result = await _quizService.GetQuizzesByAuthorAsync(authorId);
-        if (!result.Success)
-            return BadRequest(result.Message);
+        // Check if the user owns this quiz
+        if (!IsResourceOwner(result.Data.AuthorId))
+            return Forbid("You are not authorized to access this quiz");
 
         return Ok(result.Data);
     }
@@ -55,16 +69,34 @@ public class QuizController : ControllerBase
     [HttpGet("difficulty/{difficulty}")]
     public async Task<IActionResult> GetQuizzesByDifficulty(string difficulty)
     {
+        int currentUserId = GetCurrentUserId();
+        if (currentUserId == 0)
+            return Unauthorized("Invalid user credentials");
+
+        // Get all quizzes by difficulty
         var result = await _quizService.GetQuizzesByDifficultyAsync(difficulty);
         if (!result.Success)
             return BadRequest(result.Message);
 
-        return Ok(result.Data);
+        // Filter to only return the current user's quizzes
+        var userQuizzes = result.Data.Where(q => q.AuthorId == currentUserId).ToList();
+        
+        return Ok(userQuizzes);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteQuiz(int id)
     {
+        // First get the quiz to verify ownership
+        var getResult = await _quizService.GetQuizByIdAsync(id);
+        if (!getResult.Success)
+            return NotFound(getResult.Message);
+
+        // Check if the user owns this quiz
+        if (!IsResourceOwner(getResult.Data.AuthorId))
+            return Forbid("You are not authorized to delete this quiz");
+
+        // Delete the quiz
         var result = await _quizService.DeleteQuizAsync(id);
         if (!result.Success)
             return NotFound(result.Message);
