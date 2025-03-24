@@ -1,0 +1,107 @@
+@page
+@model CreateQuizModel
+@{
+    ViewData["Title"] = "Create Quiz";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center mb-0">Create New Quiz</h2>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            @Model.ErrorMessage
+                        </div>
+                    }
+
+                    <form method="post" id="createQuizForm">
+                        <div class="mb-3">
+                            <label for="topic" class="form-label">What would you like to learn about?</label>
+                            <textarea class="form-control" id="topic" name="Topic" rows="3" 
+                                    placeholder="Enter a topic or subject you want to learn about..."
+                                    required></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="questionCount" class="form-label">Number of Questions</label>
+                                <select class="form-select" id="questionCount" name="QuestionCount" required>
+                                    <option value="3">3 questions</option>
+                                    <option value="6" selected>6 questions</option>
+                                    <option value="9">9 questions</option>
+                                    <option value="12">12 questions</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="difficulty" class="form-label">Difficulty Level</label>
+                                <select class="form-select" id="difficulty" name="Difficulty" required>
+                                    <option value="easy">Easy</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="hard">Hard</option>
+                                    <option value="expert">Expert</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Question Types</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="singleChoice" 
+                                               name="QuestionTypes" value="single-select" checked>
+                                        <label class="form-check-label" for="singleChoice">
+                                            Single Choice
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="multiChoice" 
+                                               name="QuestionTypes" value="multi-select" checked>
+                                        <label class="form-check-label" for="multiChoice">
+                                            Multiple Choice
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="trueFalse" 
+                                               name="QuestionTypes" value="true-false" checked>
+                                        <label class="form-check-label" for="trueFalse">
+                                            True/False
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" id="generateButton">
+                                <i class="bi bi-magic"></i> Generate Quiz
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('createQuizForm').addEventListener('submit', function(e) {
+            const checkboxes = document.querySelectorAll('input[name="QuestionTypes"]:checked');
+            if (checkboxes.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one question type');
+                return;
+            }
+        });
+    </script>
+} 
