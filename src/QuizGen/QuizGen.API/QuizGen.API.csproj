@@ -17,4 +17,9 @@
     <ProjectReference Include="..\QuizGen.DAL\QuizGen.DAL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\" />
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
 </Project>

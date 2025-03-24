@@ -1,0 +1,44 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="form-container">
+    <h2>Register</h2>
+    <hr />
+    
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+    
+    <form id="register-form" method="post">
+        <div class="mb-3">
+            <label asp-for="RegisterRequest.Name" class="form-label">Name</label>
+            <input asp-for="RegisterRequest.Name" class="form-control" />
+            <span asp-validation-for="RegisterRequest.Name" class="text-danger"></span>
+        </div>
+        
+        <div class="mb-3">
+            <label asp-for="RegisterRequest.Username" class="form-label">Username</label>
+            <input asp-for="RegisterRequest.Username" class="form-control" />
+            <span asp-validation-for="RegisterRequest.Username" class="text-danger"></span>
+        </div>
+        
+        <div class="mb-3">
+            <label asp-for="RegisterRequest.Password" class="form-label">Password</label>
+            <input asp-for="RegisterRequest.Password" class="form-control" type="password" />
+            <span asp-validation-for="RegisterRequest.Password" class="text-danger"></span>
+        </div>
+        
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Register</button>
+            <a href="/Login" class="btn btn-link">Already have an account? Login</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+} 

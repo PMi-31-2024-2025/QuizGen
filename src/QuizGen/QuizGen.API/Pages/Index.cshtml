@@ -1,0 +1,25 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to QuizGen</h1>
+    <p class="lead">Create and take quizzes with our powerful quiz generation platform.</p>
+    
+    @if (Model.IsAuthenticated)
+    {
+        <div class="mt-4">
+            <a href="/QuizList" class="btn btn-primary me-2">My Quizzes</a>
+            <a href="/CreateQuiz" class="btn btn-success">Create New Quiz</a>
+        </div>
+    }
+    else
+    {
+        <div class="mt-4">
+            <a href="/Login" class="btn btn-primary me-2">Login</a>
+            <a href="/Register" class="btn btn-outline-primary">Register</a>
+        </div>
+    }
+</div> 
