@@ -18,14 +18,14 @@ public class QuizController : BaseController
     [HttpPost]
     public async Task<IActionResult> CreateQuiz([FromBody] CreateQuizRequest request)
     {
-        // Ensure the user can only create quizzes for themselves
+        
         int currentUserId = GetCurrentUserId();
         if (currentUserId == 0)
             return Unauthorized("Invalid user credentials");
 
-        // Override the AuthorId with the current user's ID for security
+        
         var result = await _quizService.CreateQuizAsync(
-            currentUserId,  // Use current user ID instead of request.AuthorId
+            currentUserId,  
             request.Topic,
             request.Difficulty,
             request.NumQuestions,

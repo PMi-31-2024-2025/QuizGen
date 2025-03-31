@@ -67,6 +67,8 @@ public sealed partial class MyQuizzesPage : Page
                 _authStateService.CurrentCredentials?.UserId ??
                 throw new InvalidOperationException("User not authenticated"));
 
+            
+
             if (result.Success)
             {
                 var sortedQuizzes = result.Data
