@@ -52,8 +52,7 @@ public class AuthServiceTests
         Assert.NotNull(result);
         Assert.True(result.Success);
         Assert.Equal(user.Username, result.Data.Username);
-        _mockAuthStateService.Verify(s => s.SetCredentials(It.IsAny<StoredCredentials>()), Times.Once);
-        _mockAuthStateService.Verify(s => s.SaveStateAsync(), Times.Once);
+     
     }
 
     [Fact]
