@@ -1,0 +1,70 @@
+@page
+@model QuizGen.API.Pages.QuizResultModel
+@{
+    ViewData["Title"] = "Quiz Results";
+}
+
+<div class="container mt-4">
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+    else if (Model.QuizResult != null)
+    {
+        <div class="card">
+            <div class="card-header">
+                <h2>Quiz Results</h2>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h4>@Model.QuizResult.QuizName</h4>
+                        <p class="text-muted">Completed on @Model.QuizResult.FinishedAt.ToString("g")</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <h3>Score: @Model.QuizResult.Score%</h3>
+                        <p>@Model.QuizResult.CorrectAnswers out of @Model.QuizResult.TotalQuestions correct</p>
+                    </div>
+                </div>
+
+                <div class="list-group">
+                    @foreach (var question in Model.QuizResult.Questions)
+                    {
+                        <div class="list-group-item">
+                            <h5 class="mb-3">@question.Text</h5>
+                            <div class="mb-2">
+                                <strong>Your answer:</strong>
+                                <span class="@(question.IsCorrect ? "text-success" : "text-danger")">
+                                    @(question.Answers.FirstOrDefault(a => a.WasSelected)?.Text ?? "No answer selected")
+                                </span>
+                            </div>
+                            @if (!question.IsCorrect)
+                            {
+                                <div class="text-success">
+                                    <strong>Correct answer:</strong> @(question.Answers.FirstOrDefault(a => a.IsCorrect)?.Text ?? "No correct answer")
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(question.Explanation))
+                            {
+                                <div class="mt-2 text-muted">
+                                    <i class="bi bi-info-circle"></i> @question.Explanation
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="mt-4">
+                    <a href="/quizzes" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Quizzes
+                    </a>
+                    <a href="/quiz/@Model.AttemptId/try" class="btn btn-primary ms-2">
+                        Try Again
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div> 

@@ -16,7 +16,15 @@ QuestPDF.Settings.License = LicenseType.Community;
 
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+    // More specific routes first
+    options.Conventions.AddPageRoute("/QuizTry", "quiz/{quizId}/try/{attemptId}");
+    options.Conventions.AddPageRoute("/QuizTry", "quiz/{quizId}/try");
+    options.Conventions.AddPageRoute("/QuizResult", "quiz/result/{attemptId}");
+    options.Conventions.AddPageRoute("/QuizDetails", "quiz/{id}");
+    options.Conventions.AddPageRoute("/QuizList", "quizzes");
+});
 
 // Add HttpClient services
 builder.Services.AddHttpClient();

@@ -10,7 +10,7 @@
         <div class="alert alert-danger">
             @Model.ErrorMessage
         </div>
-        <a href="/QuizList" class="btn btn-primary mt-3">
+        <a asp-page="/QuizList" class="btn btn-primary mt-3">
             <i class="bi bi-arrow-left"></i> Back to My Quizzes
         </a>
     }
@@ -48,7 +48,7 @@
                         </li>
                     </ul>
                 </div>
-                <a href="/QuizTry/Start/@Model.QuizId" class="btn btn-success ms-2">
+                <a href="/quiz/@Model.QuizId/try" class="btn btn-success ms-2">
                     <i class="bi bi-play-fill"></i> Start Quiz
                 </a>
             </div>
@@ -113,7 +113,7 @@
                             </td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <a href="/QuizTry/@quizTry.Id" class="btn btn-sm btn-outline-primary">
+                                    <a href="/quiz/@Model.QuizId/try/@quizTry.Id" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i> View
                                     </a>
                                     @if (quizTry.FinishedAt.HasValue)
@@ -151,7 +151,7 @@
         }
         
         <div class="mt-4">
-            <a href="/QuizList" class="btn btn-secondary">
+            <a asp-page="/QuizList" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Back to My Quizzes
             </a>
         </div>
@@ -161,7 +161,7 @@
         <div class="alert alert-warning">
             Quiz not found or you don't have permission to view it.
         </div>
-        <a href="/QuizList" class="btn btn-primary">
+        <a asp-page="/QuizList" class="btn btn-primary">
             <i class="bi bi-arrow-left"></i> Back to My Quizzes
         </a>
     }

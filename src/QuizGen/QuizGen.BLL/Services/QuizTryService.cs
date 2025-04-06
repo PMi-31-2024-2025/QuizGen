@@ -180,7 +180,26 @@ public class QuizTryService : IQuizTryService
             var questions = await _questionRepository.GetByQuizIdAsync(quizTry.QuizId);
             var answers = await _answerRepository.GetByQuizIdAsync(quizTry.QuizId);
 
-            var currentQuestionIndex = quizTry.QuizAnswers.Count;
+            // Get the current question index based on the number of answers
+            var answeredQuestionIds = quizTry.QuizAnswers
+                .Select(qa => qa.QuestionId)
+                .Distinct()
+                .ToList();
+
+            // Find the first unanswered question
+            var currentQuestionIndex = 0;
+            for (int i = 0; i < questions.Count(); i++)
+            {
+                if (!answeredQuestionIds.Contains(questions.ElementAt(i).Id))
+                {
+                    currentQuestionIndex = i;
+                    break;
+                }
+                if (i == questions.Count() - 1)
+                {
+                    currentQuestionIndex = i;
+                }
+            }
 
             var dto = new QuizTryDetailsDto
             {
@@ -347,8 +366,10 @@ public class QuizTryService : IQuizTryService
             if (quizTry == null)
                 return ServiceResult<bool>.CreateError("Quiz try not found");
 
+            // Remove existing answers for this question
             await _quizTryRepository.RemoveAnswersForQuestionAsync(quizTryId, questionId);
 
+            // Add new answers
             foreach (var answerId in selectedAnswerIds)
             {
                 var quizAnswer = new QuizAnswer
@@ -402,29 +423,13 @@ public class QuizTryService : IQuizTryService
     {
         try
         {
-            var quizTries = await _quizTryRepository.GetCompletedByUserIdAsync(userId);
-
-            var dtos = quizTries
-                .Where(qt => qt.FinishedAt.HasValue)
-                .Select(qt => new QuizTryListItemDto
-                {
-                    Id = qt.Id,
-                    QuizName = qt.Quiz.Name,
-                    Difficulty = qt.Quiz.Difficulty,
-                    QuestionTypes = qt.Quiz.AllowedTypes,
-                    TotalQuestions = qt.Quiz.NumQuestions,
-                    Score = qt.Score ?? 0,
-                    Duration = qt.FinishedAt.Value - qt.StartedAt,
-                    StartedAt = qt.StartedAt,
-                    FinishedAt = qt.FinishedAt.Value
-                });
-
+            var quizTries = await _quizTryRepository.GetByUserIdAsync(userId);
+            var dtos = await Task.WhenAll(quizTries.Select(MapToListItemDto));
             return ServiceResult<IEnumerable<QuizTryListItemDto>>.CreateSuccess(dtos);
         }
         catch (Exception ex)
         {
-            return ServiceResult<IEnumerable<QuizTryListItemDto>>.CreateError(
-                $"Failed to get user quiz tries: {ex.Message}");
+            return ServiceResult<IEnumerable<QuizTryListItemDto>>.CreateError($"Failed to get user quiz tries: {ex.Message}");
         }
     }
 
@@ -488,6 +493,26 @@ public class QuizTryService : IQuizTryService
                 IsCorrect = qa.Answer?.IsCorrect ?? false,
                 CreatedAt = qa.CreatedAt
             }).ToList()
+        };
+    }
+
+    private async Task<QuizTryListItemDto> MapToListItemDto(QuizTry quizTry)
+    {
+        var quiz = await _quizRepository.GetByIdAsync(quizTry.QuizId);
+        if (quiz == null)
+            throw new Exception($"Quiz with ID {quizTry.QuizId} not found");
+
+        return new QuizTryListItemDto
+        {
+            Id = quizTry.Id,
+            QuizName = quiz.Name,
+            Difficulty = quiz.Difficulty,
+            QuestionTypes = quiz.AllowedTypes,
+            TotalQuestions = quiz.NumQuestions,
+            Score = quizTry.Score ?? 0,
+            Duration = quizTry.FinishedAt.HasValue ? quizTry.FinishedAt.Value - quizTry.StartedAt : TimeSpan.Zero,
+            StartedAt = quizTry.StartedAt,
+            FinishedAt = quizTry.FinishedAt ?? DateTime.MinValue
         };
     }
 }
