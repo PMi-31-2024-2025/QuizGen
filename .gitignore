@@ -32,3 +32,5 @@ msbuild.wrn
 .vs/
 
 packages/
+
+.fake
