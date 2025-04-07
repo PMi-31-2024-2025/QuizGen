@@ -1,0 +1,118 @@
+@startuml
+title Use Case Diagram: Система Квізів
+left to right direction
+skinparam ArrowColor black
+skinparam ArrowThickness 1
+skinparam ArrowFontName Arial
+skinparam ArrowFontSize 12
+skinparam RectangleFontName Arial
+skinparam RectangleFontSize 14
+skinparam ActorFontName Arial
+skinparam ActorFontSize 14
+
+actor "Зареєстрований користувач" as User
+
+rectangle "Управління профілем" {
+    User -right-> (Логін)
+    note right of (Логін)
+        Користувач вводить свої дані для доступу до системи.
+    end note
+
+    User -right-> (Реєстрація)
+    note right of (Реєстрація)
+        Створення нового облікового запису.
+    end note
+
+    User -down-> (Отримати інформацію профіля)
+    note right of (Отримати інформацію профіля)
+        Перегляд персональних даних та налаштувань.
+    end note
+
+    User -down-> (Зміна паролю)
+    note right of (Зміна паролю)
+        Оновлення паролю для облікового запису.
+    end note
+
+    User -down-> (Зміна даних профілю)
+    note right of (Зміна даних профілю)
+        Редагування персональної інформації, включаючи ім'я та OpenAI-Key.
+    end note
+}
+
+rectangle "Робота з квізами" {
+    User -right-> (Отримання квіза за id)
+    note right of (Отримання квіза за id)
+        Доступ до квіза за унікальним ідентифікатором.
+    end note
+
+    User -right-> (Отримання квіза за складністю)
+    note right of (Отримання квіза за складністю)
+        Вибір квіза відповідно до рівня складності.
+    end note
+
+    User -down-> (Створити квіз)
+    note right of (Створити квіз)
+        Генерація нового квіза з вибором теми, питань та відповідей.
+    end note
+
+    User -down-> (Видалити квіз)
+    note right of (Видалити квіз)
+        Видалення створеного квіза.
+    end note
+
+    User -down-> (Отримати квізи користувача)
+    note right of (Отримати квізи користувача)
+        Перегляд усіх квізів, створених або збережених користувачем.
+    end note
+
+    User -right-> (Почати спробу квіза)
+    note right of (Почати спробу квіза)
+        Розпочати проходження квіза, відповідаючи на питання.
+    end note
+
+    (Почати спробу квіза) ..> (Надіслати відповідь) : <<include>>
+    note right of (Надіслати відповідь)
+        Відправка відповіді на поточне питання квіза.
+    end note
+
+    User -down-> (Отримати спроби квізу)
+    note right of (Отримати спроби квізу)
+        Перегляд попередніх спроб проходження квізів.
+    end note
+
+    User -down-> (Отримати деталі квіза)
+    note right of (Отримати деталі квіза)
+        Перегляд детальної інформації про квіз.
+    end note
+
+    User -down-> (Отримати відповіді на квіз)
+    note right of (Отримати відповіді на квіз)
+        Перегляд правильних відповідей після завершення спроби.
+    end note
+}
+
+rectangle "Експорт даних" {
+    User -right-> (Експортувати квіз як PDF)
+    note right of (Експортувати квіз як PDF)
+        Збереження квіза у форматі PDF.
+    end note
+
+    (Експортувати квіз як PDF) ..> (Отримати квізи користувача) : <<extend>>
+
+    User -right-> (Експортувати квіз як текст)
+    note right of (Експортувати квіз як текст)
+        Збереження квіза у текстовому форматі.
+    end note
+
+    User -down-> (Експортувати спробу квіза як PDF)
+    note right of (Експортувати спробу квіза як PDF)
+        Збереження спроби квіза у форматі PDF.
+    end note
+
+    User -down-> (Експортувати спробу квіза як текст)
+    note right of (Експортувати спробу квіза як текст)
+        Збереження спроби квіза у текстовому форматі.
+    end note
+}
+
+@enduml
