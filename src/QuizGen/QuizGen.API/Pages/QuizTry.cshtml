@@ -1,0 +1,65 @@
+@page
+@model QuizGen.API.Pages.QuizTryModel
+@{
+    ViewData["Title"] = "Take Quiz";
+}
+
+<div class="container mt-4">
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+    
+    @if (Model.QuizTry != null)
+    {
+        <div class="card">
+            <div class="card-header">
+                <h2>@Model.QuizTry.QuizName</h2>
+                <p class="text-muted">Question @(Model.QuizTry.CurrentQuestionIndex + 1) of @Model.QuizTry.TotalQuestions</p>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="SubmitAnswer">
+                    <input type="hidden" asp-for="QuizId" />
+                    <input type="hidden" asp-for="AttemptId" />
+                    
+                    <div class="mb-4">
+                        <h4>@Model.QuizTry.Questions[Model.QuizTry.CurrentQuestionIndex].Text</h4>
+                        @if (Model.QuizTry.Questions[Model.QuizTry.CurrentQuestionIndex].Type == "multi-select")
+                        {
+                            <small class="text-muted">Select all that apply</small>
+                        }
+                    </div>
+
+                    <div class="list-group">
+                        @foreach (var answer in Model.QuizTry.Questions[Model.QuizTry.CurrentQuestionIndex].AnswerOptions)
+                        {
+                            <label class="list-group-item">
+                                @if (Model.QuizTry.Questions[Model.QuizTry.CurrentQuestionIndex].Type == "multi-select")
+                                {
+                                    <input type="checkbox" 
+                                           name="SelectedAnswerIds" 
+                                           value="@answer.Id" 
+                                           class="form-check-input me-2">
+                                }
+                                else
+                                {
+                                    <input type="radio" 
+                                           asp-for="SelectedAnswerId" 
+                                           value="@answer.Id" 
+                                           class="form-check-input me-2">
+                                }
+                                @answer.Text
+                            </label>
+                        }
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Submit Answer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+</div> 
