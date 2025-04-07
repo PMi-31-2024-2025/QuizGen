@@ -87,24 +87,13 @@
                             <td>
                                 @if (quizTry.FinishedAt.HasValue)
                                 {
-                                    // If the quiz try is finished, display the score
-                                    double score = 0;
-                                    
-                                    // Safely check if Answers collection exists and has items
-                                    if (quizTry.Answers != null && quizTry.Answers.Any())
-                                    {
-                                        // Find all correct answers for this quiz
-                                        var correctAnswers = quizTry.Answers.Count(a => a != null && a.IsCorrect);
-                                        var totalAnswers = quizTry.Answers.Count;
-
-                                        // Calculate score as a percentage
-                                        score = totalAnswers > 0 ? (correctAnswers * 100.0 / totalAnswers) : 0;
-                                    }
+                                    var scoreResult = await Model.GetQuizTryScoreAsync(quizTry.Id);
+                                    var score = scoreResult?.Score ?? 0;
                                     
                                     var scoreClass = score >= 70 ? "text-success" : 
                                                     (score >= 50 ? "text-warning" : "text-danger");
 
-                                    <span class="@scoreClass">@score.ToString("F1")%</span>
+                                    <span class="@scoreClass">@Math.Round(score)%</span>
                                 }
                                 else
                                 {
@@ -113,11 +102,12 @@
                             </td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <a href="/quiz/@Model.QuizId/try/@quizTry.Id" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
                                     @if (quizTry.FinishedAt.HasValue)
                                     {
+                                        <a href="/quiz/result/@quizTry.Id" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        
                                         <div class="dropdown d-inline">
                                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="bi bi-file-earmark-arrow-down"></i> Export
@@ -135,6 +125,12 @@
                                                 </li>
                                             </ul>
                                         </div>
+                                    }
+                                    else
+                                    {
+                                        <a href="/quiz/@Model.QuizId/try/@quizTry.Id" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
                                     }
                                 </div>
                             </td>

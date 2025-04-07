@@ -24,7 +24,7 @@
                         <p class="text-muted">Completed on @Model.QuizResult.FinishedAt.ToString("g")</p>
                     </div>
                     <div class="col-md-6 text-end">
-                        <h3>Score: @Model.QuizResult.Score%</h3>
+                        <h3>Score: @Math.Round(Model.QuizResult.Score)%</h3>
                         <p>@Model.QuizResult.CorrectAnswers out of @Model.QuizResult.TotalQuestions correct</p>
                     </div>
                 </div>
@@ -36,14 +36,28 @@
                             <h5 class="mb-3">@question.Text</h5>
                             <div class="mb-2">
                                 <strong>Your answer:</strong>
-                                <span class="@(question.IsCorrect ? "text-success" : "text-danger")">
-                                    @(question.Answers.FirstOrDefault(a => a.WasSelected)?.Text ?? "No answer selected")
-                                </span>
+                                @if (question.Answers.Any(a => a.WasSelected))
+                                {
+                                    <span class="d-inline-flex flex-wrap">
+                                        @foreach (var answer in question.Answers.Where(a => a.WasSelected))
+                                        {
+                                            <span class="@(answer.IsCorrect ? "text-success" : "text-danger")">@answer.Text</span>
+                                            @if (!answer.Equals(question.Answers.Where(a => a.WasSelected).Last()))
+                                            {
+                                                <span>,&nbsp;</span>
+                                            }
+                                        }
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger">No answer selected</span>
+                                }
                             </div>
                             @if (!question.IsCorrect)
                             {
                                 <div class="text-success">
-                                    <strong>Correct answer:</strong> @(question.Answers.FirstOrDefault(a => a.IsCorrect)?.Text ?? "No correct answer")
+                                    <strong>Correct answer:</strong> @(string.Join(", ", question.Answers.Where(a => a.IsCorrect).Select(a => a.Text)) ?? "No correct answer")
                                 </div>
                             }
                             @if (!string.IsNullOrEmpty(question.Explanation))

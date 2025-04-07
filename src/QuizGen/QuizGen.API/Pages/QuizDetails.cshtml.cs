@@ -114,5 +114,18 @@ namespace QuizGen.API.Pages
                 }
             }
         }
+
+        public async Task<QuizTryResultDto?> GetQuizTryScoreAsync(int quizTryId)
+        {
+            try
+            {
+                var result = await _quizTryService.CalculateAndSaveScoreAsync(quizTryId);
+                return result.Success ? result.Data : null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
     }
 } 
