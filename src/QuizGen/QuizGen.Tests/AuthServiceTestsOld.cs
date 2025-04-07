@@ -6,14 +6,14 @@ using QuizGen.BLL.Services.Interfaces;
 using QuizGen.DAL.Interfaces;
 using QuizGen.DAL.Models;
 
-public class AuthServiceTests
+public class AuthServiceTestsOld
 {
     private readonly Mock<IUserRepository> _mockUserRepository;
     private readonly Mock<IAuthStateService> _mockAuthStateService;
     private readonly Mock<IConfiguration> _mockConfiguration;
     private readonly AuthService _authService;
 
-    public AuthServiceTests()
+    public AuthServiceTestsOld()
     {
         _mockUserRepository = new Mock<IUserRepository>();
         _mockAuthStateService = new Mock<IAuthStateService>();

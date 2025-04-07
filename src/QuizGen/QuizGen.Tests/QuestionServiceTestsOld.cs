@@ -3,13 +3,13 @@ using QuizGen.BLL.Services;
 using QuizGen.DAL.Interfaces;
 using QuizGen.DAL.Models;
 
-public class QuestionServiceTests
+public class QuestionServiceTestsOld
 {
     private readonly Mock<IQuestionRepository> _mockQuestionRepository;
     private readonly Mock<IQuizRepository> _mockQuizRepository;
     private readonly QuestionService _questionService;
 
-    public QuestionServiceTests()
+    public QuestionServiceTestsOld()
     {
         _mockQuestionRepository = new Mock<IQuestionRepository>();
         _mockQuizRepository = new Mock<IQuizRepository>();
