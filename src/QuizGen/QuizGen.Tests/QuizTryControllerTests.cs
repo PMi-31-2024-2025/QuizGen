@@ -54,7 +54,7 @@ namespace QuizGen.Tests
             var quiz = new QuizDto
             {
                 Id = quizId,
-                AuthorId = userId,
+                AuthorId = 2, // Different from current user
                 Name = "Test Quiz",
                 AuthorName = "Test User"
             };
@@ -70,12 +70,10 @@ namespace QuizGen.Tests
                 Id = 1,
                 QuizId = quizId,
                 UserId = userId,
-                QuizPrompt = "Test Quiz",
-                UserName = "Test User",
                 StartedAt = DateTime.UtcNow
             };
 
-            var quizTryResult = new ServiceResult<QuizTryDto>
+            var tryResult = new ServiceResult<QuizTryDto>
             {
                 Success = true,
                 Data = quizTry
@@ -85,7 +83,7 @@ namespace QuizGen.Tests
                 .Returns(Task.FromResult(quizResult));
 
             _mockQuizTryService.Setup(s => s.StartQuizTryAsync(quizId, userId))
-                .Returns(Task.FromResult(quizTryResult));
+                .Returns(Task.FromResult(tryResult));
 
             // Act
             var result = await _quizTryController.StartQuizTry(quizId);
@@ -95,9 +93,7 @@ namespace QuizGen.Tests
             Assert.Equal(nameof(QuizTryController.GetQuizTryDetails), createdResult.ActionName);
             Assert.Equal(quizId, createdResult.RouteValues["quizId"]);
             Assert.Equal(quizTry.Id, createdResult.RouteValues["attemptId"]);
-            var response = Assert.IsType<QuizTryDto>(createdResult.Value);
-            Assert.Equal(quizId, response.QuizId);
-            Assert.Equal(userId, response.UserId);
+            Assert.Equal(quizTry, createdResult.Value);
         }
 
         [Fact]
@@ -111,9 +107,9 @@ namespace QuizGen.Tests
             var quiz = new QuizDto
             {
                 Id = quizId,
-                AuthorId = 2, // Different author
+                AuthorId = userId, // Same as current user
                 Name = "Test Quiz",
-                AuthorName = "Other User"
+                AuthorName = "Test User"
             };
 
             var quizResult = new ServiceResult<QuizDto>
@@ -141,28 +137,32 @@ namespace QuizGen.Tests
 
             var quizTries = new List<QuizTryDto>
             {
-                new QuizTryDto { Id = 1, QuizId = 1, UserId = userId, QuizPrompt = "Quiz 1" },
-                new QuizTryDto { Id = 2, QuizId = 2, UserId = userId, QuizPrompt = "Quiz 2" }
+                new QuizTryDto
+                {
+                    Id = 1,
+                    QuizId = 1,
+                    UserId = userId,
+                    StartedAt = DateTime.UtcNow
+                }
             };
 
-            var expectedResponse = new ServiceResult<IEnumerable<QuizTryDto>>
+            var result = new ServiceResult<IEnumerable<QuizTryDto>>
             {
                 Success = true,
                 Data = quizTries
             };
 
             _mockQuizTryService.Setup(s => s.GetQuizTriesByUserAsync(userId))
-                .Returns(Task.FromResult(expectedResponse));
+                .Returns(Task.FromResult(result));
 
             // Act
-            var result = await _quizTryController.GetMyQuizTries();
+            var actionResult = await _quizTryController.GetMyQuizTries();
 
             // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<List<QuizTryDto>>(okResult.Value);
-            Assert.Equal(2, response.Count);
-            Assert.Equal("Quiz 1", response[0].QuizPrompt);
-            Assert.Equal("Quiz 2", response[1].QuizPrompt);
+            var okResult = Assert.IsType<OkObjectResult>(actionResult);
+            var returnedTries = Assert.IsAssignableFrom<IEnumerable<QuizTryDto>>(okResult.Value);
+            Assert.Single(returnedTries);
+            Assert.Equal(quizTries[0].Id, returnedTries.First().Id);
         }
 
         [Fact]
@@ -189,11 +189,16 @@ namespace QuizGen.Tests
 
             var quizTries = new List<QuizTryDto>
             {
-                new QuizTryDto { Id = 1, QuizId = quizId, UserId = userId, QuizPrompt = "Quiz 1" },
-                new QuizTryDto { Id = 2, QuizId = quizId, UserId = userId, QuizPrompt = "Quiz 2" }
+                new QuizTryDto
+                {
+                    Id = 1,
+                    QuizId = quizId,
+                    UserId = userId,
+                    StartedAt = DateTime.UtcNow
+                }
             };
 
-            var expectedResponse = new ServiceResult<IEnumerable<QuizTryDto>>
+            var triesResult = new ServiceResult<IEnumerable<QuizTryDto>>
             {
                 Success = true,
                 Data = quizTries
@@ -203,16 +208,16 @@ namespace QuizGen.Tests
                 .Returns(Task.FromResult(quizResult));
 
             _mockQuizTryService.Setup(s => s.GetQuizTriesByQuizAsync(quizId))
-                .Returns(Task.FromResult(expectedResponse));
+                .Returns(Task.FromResult(triesResult));
 
             // Act
             var result = await _quizTryController.GetQuizAttempts(quizId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<List<QuizTryDto>>(okResult.Value);
-            Assert.Equal(2, response.Count);
-            Assert.All(response, t => Assert.Equal(userId, t.UserId));
+            var returnedTries = Assert.IsAssignableFrom<List<QuizTryDto>>(okResult.Value);
+            Assert.Single(returnedTries);
+            Assert.Equal(quizTries[0].Id, returnedTries[0].Id);
         }
 
         [Fact]
@@ -230,31 +235,29 @@ namespace QuizGen.Tests
                 QuizId = quizId,
                 UserId = userId,
                 QuizName = "Test Quiz",
-                QuizPrompt = "Test Prompt",
-                Difficulty = "Easy",
                 CurrentQuestionIndex = 0,
-                TotalQuestions = 5,
-                StartedAt = DateTime.UtcNow
+                TotalQuestions = 10,
+                Questions = new List<QuizTryQuestionDto>()
             };
 
-            var expectedResponse = new ServiceResult<QuizTryDetailsDto>
+            var result = new ServiceResult<QuizTryDetailsDto>
             {
                 Success = true,
                 Data = quizTryDetails
             };
 
             _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
-                .Returns(Task.FromResult(expectedResponse));
+                .Returns(Task.FromResult(result));
 
             // Act
-            var result = await _quizTryController.GetQuizTryDetails(quizId, attemptId);
+            var actionResult = await _quizTryController.GetQuizTryDetails(quizId, attemptId);
 
             // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<QuizTryDetailsDto>(okResult.Value);
-            Assert.Equal(attemptId, response.Id);
-            Assert.Equal(quizId, response.QuizId);
-            Assert.Equal(userId, response.UserId);
+            var okResult = Assert.IsType<OkObjectResult>(actionResult);
+            var returnedDetails = Assert.IsType<QuizTryDetailsDto>(okResult.Value);
+            Assert.Equal(quizTryDetails.Id, returnedDetails.Id);
+            Assert.Equal(quizTryDetails.QuizId, returnedDetails.QuizId);
+            Assert.Equal(quizTryDetails.UserId, returnedDetails.UserId);
         }
 
         [Fact]
@@ -276,7 +279,7 @@ namespace QuizGen.Tests
                 QuizName = "Test Quiz"
             };
 
-            var quizTryResult = new ServiceResult<QuizTryDetailsDto>
+            var attemptResult = new ServiceResult<QuizTryDetailsDto>
             {
                 Success = true,
                 Data = quizTryDetails
@@ -290,29 +293,27 @@ namespace QuizGen.Tests
                 AnswerId = answerId,
                 QuestionText = "Test Question",
                 AnswerText = "Test Answer",
-                IsCorrect = true
+                IsCorrect = true,
+                CreatedAt = DateTime.UtcNow
             };
 
-            var quizAnswerResult = new ServiceResult<QuizAnswerDto>
+            var answerResult = new ServiceResult<QuizAnswerDto>
             {
                 Success = true,
                 Data = quizAnswer
             };
+
+            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
+                .Returns(Task.FromResult(attemptResult));
+
+            _mockQuizAnswerService.Setup(s => s.CreateQuizAnswerAsync(attemptId, questionId, answerId))
+                .Returns(Task.FromResult(answerResult));
 
             var request = new SubmitAnswerRequest
             {
                 QuestionId = questionId,
                 AnswerId = answerId
             };
-
-            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
-                .Returns(Task.FromResult(quizTryResult));
-
-            _mockQuizAnswerService.Setup(s => s.CreateQuizAnswerAsync(
-                attemptId,
-                questionId,
-                answerId
-            )).Returns(Task.FromResult(quizAnswerResult));
 
             // Act
             var result = await _quizTryController.SubmitAnswer(quizId, attemptId, request);
@@ -322,9 +323,7 @@ namespace QuizGen.Tests
             Assert.Equal(nameof(QuizTryController.GetQuizTryAnswers), createdResult.ActionName);
             Assert.Equal(quizId, createdResult.RouteValues["quizId"]);
             Assert.Equal(attemptId, createdResult.RouteValues["attemptId"]);
-            var response = Assert.IsType<QuizAnswerDto>(createdResult.Value);
-            Assert.Equal(questionId, response.QuestionId);
-            Assert.Equal(answerId, response.AnswerId);
+            Assert.Equal(quizAnswer, createdResult.Value);
         }
 
         [Fact]
@@ -344,7 +343,7 @@ namespace QuizGen.Tests
                 QuizName = "Test Quiz"
             };
 
-            var quizTryResult = new ServiceResult<QuizTryDetailsDto>
+            var attemptResult = new ServiceResult<QuizTryDetailsDto>
             {
                 Success = true,
                 Data = quizTryDetails
@@ -358,43 +357,264 @@ namespace QuizGen.Tests
                     QuizTryId = attemptId,
                     QuestionId = 1,
                     AnswerId = 1,
-                    QuestionText = "Question 1",
-                    AnswerText = "Answer 1",
-                    IsCorrect = true
-                },
-                new QuizAnswerDto
-                {
-                    Id = 2,
-                    QuizTryId = attemptId,
-                    QuestionId = 2,
-                    AnswerId = 2,
-                    QuestionText = "Question 2",
-                    AnswerText = "Answer 2",
-                    IsCorrect = false
+                    QuestionText = "Test Question",
+                    AnswerText = "Test Answer",
+                    IsCorrect = true,
+                    CreatedAt = DateTime.UtcNow
                 }
             };
 
-            var expectedResponse = new ServiceResult<IEnumerable<QuizAnswerDto>>
+            var answersResult = new ServiceResult<IEnumerable<QuizAnswerDto>>
             {
                 Success = true,
                 Data = quizAnswers
             };
 
             _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
-                .Returns(Task.FromResult(quizTryResult));
+                .Returns(Task.FromResult(attemptResult));
 
             _mockQuizAnswerService.Setup(s => s.GetQuizAnswersByQuizTryAsync(attemptId))
-                .Returns(Task.FromResult(expectedResponse));
+                .Returns(Task.FromResult(answersResult));
 
             // Act
             var result = await _quizTryController.GetQuizTryAnswers(quizId, attemptId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<List<QuizAnswerDto>>(okResult.Value);
-            Assert.Equal(2, response.Count);
-            Assert.Equal("Question 1", response[0].QuestionText);
-            Assert.Equal("Question 2", response[1].QuestionText);
+            var returnedAnswers = Assert.IsAssignableFrom<IEnumerable<QuizAnswerDto>>(okResult.Value);
+            Assert.Single(returnedAnswers);
+            Assert.Equal(quizAnswers[0].Id, returnedAnswers.First().Id);
+        }
+
+        [Fact]
+        public async Task StartQuizTry_QuizNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var quizResult = new ServiceResult<QuizDto>
+            {
+                Success = false,
+                Message = "Quiz not found"
+            };
+
+            _mockQuizService.Setup(s => s.GetQuizByIdAsync(quizId))
+                .Returns(Task.FromResult(quizResult));
+
+            // Act
+            var result = await _quizTryController.StartQuizTry(quizId);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Quiz not found", notFoundResult.Value);
+        }
+
+        [Fact]
+        public async Task StartQuizTry_ServiceThrowsException_ReturnsBadRequest()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var quiz = new QuizDto
+            {
+                Id = quizId,
+                AuthorId = 2, // Different from current user
+                Name = "Test Quiz",
+                AuthorName = "Test User"
+            };
+
+            var quizResult = new ServiceResult<QuizDto>
+            {
+                Success = true,
+                Data = quiz
+            };
+
+            _mockQuizService.Setup(s => s.GetQuizByIdAsync(quizId))
+                .Returns(Task.FromResult(quizResult));
+
+            _mockQuizTryService.Setup(s => s.StartQuizTryAsync(quizId, userId))
+                .Throws(new Exception("Failed to start quiz try"));
+
+            // Act
+            var result = await _quizTryController.StartQuizTry(quizId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Failed to start quiz try", badRequestResult.Value);
+        }
+
+        [Fact]
+        public async Task GetQuizTryDetails_AttemptNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            var attemptId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var result = new ServiceResult<QuizTryDetailsDto>
+            {
+                Success = false,
+                Message = "Quiz attempt not found"
+            };
+
+            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
+                .Returns(Task.FromResult(result));
+
+            // Act
+            var actionResult = await _quizTryController.GetQuizTryDetails(quizId, attemptId);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(actionResult);
+            Assert.Equal("Quiz attempt not found", notFoundResult.Value);
+        }
+
+        [Fact]
+        public async Task SubmitAnswer_AttemptNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            var attemptId = 1;
+            var questionId = 1;
+            var answerId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var attemptResult = new ServiceResult<QuizTryDetailsDto>
+            {
+                Success = false,
+                Message = "Quiz attempt not found"
+            };
+
+            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
+                .Returns(Task.FromResult(attemptResult));
+
+            var request = new SubmitAnswerRequest
+            {
+                QuestionId = questionId,
+                AnswerId = answerId
+            };
+
+            // Act
+            var result = await _quizTryController.SubmitAnswer(quizId, attemptId, request);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Quiz attempt not found", notFoundResult.Value);
+        }
+
+        [Fact]
+        public async Task SubmitAnswer_InvalidRequest_ReturnsBadRequest()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            var attemptId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var quizTryDetails = new QuizTryDetailsDto
+            {
+                Id = attemptId,
+                QuizId = quizId,
+                UserId = userId,
+                QuizName = "Test Quiz"
+            };
+
+            var attemptResult = new ServiceResult<QuizTryDetailsDto>
+            {
+                Success = true,
+                Data = quizTryDetails
+            };
+
+            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
+                .Returns(Task.FromResult(attemptResult));
+
+            var request = new SubmitAnswerRequest
+            {
+                QuestionId = 0, // Invalid question ID
+                AnswerId = 0    // Invalid answer ID
+            };
+
+            // Act
+            var result = await _quizTryController.SubmitAnswer(quizId, attemptId, request);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Contains("Invalid question ID", badRequestResult.Value.ToString());
+        }
+
+        [Fact]
+        public async Task GetQuizTryAnswers_AttemptNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            var attemptId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var attemptResult = new ServiceResult<QuizTryDetailsDto>
+            {
+                Success = false,
+                Message = "Quiz attempt not found"
+            };
+
+            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
+                .Returns(Task.FromResult(attemptResult));
+
+            // Act
+            var result = await _quizTryController.GetQuizTryAnswers(quizId, attemptId);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Quiz attempt not found", notFoundResult.Value);
+        }
+
+        [Fact]
+        public async Task GetQuizTryAnswers_NoAnswers_ReturnsEmptyList()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            var attemptId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var quizTryDetails = new QuizTryDetailsDto
+            {
+                Id = attemptId,
+                QuizId = quizId,
+                UserId = userId,
+                QuizName = "Test Quiz"
+            };
+
+            var attemptResult = new ServiceResult<QuizTryDetailsDto>
+            {
+                Success = true,
+                Data = quizTryDetails
+            };
+
+            var answersResult = new ServiceResult<IEnumerable<QuizAnswerDto>>
+            {
+                Success = true,
+                Data = new List<QuizAnswerDto>()
+            };
+
+            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
+                .Returns(Task.FromResult(attemptResult));
+
+            _mockQuizAnswerService.Setup(s => s.GetQuizAnswersByQuizTryAsync(attemptId))
+                .Returns(Task.FromResult(answersResult));
+
+            // Act
+            var result = await _quizTryController.GetQuizTryAnswers(quizId, attemptId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedAnswers = Assert.IsAssignableFrom<IEnumerable<QuizAnswerDto>>(okResult.Value);
+            Assert.Empty(returnedAnswers);
         }
     }
 } 

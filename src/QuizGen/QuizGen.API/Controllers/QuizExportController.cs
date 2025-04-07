@@ -51,11 +51,18 @@ public class QuizExportController : BaseController
                 return Forbid("You are not authorized to export this quiz");
         }
 
-        var result = await _quizExportService.ExportAsPdfAsync(quizId, includeAnswers);
-        if (!result.Success)
-            return BadRequest(result.Message);
+        try
+        {
+            var result = await _quizExportService.ExportAsPdfAsync(quizId, includeAnswers);
+            if (!result.Success)
+                return BadRequest(result.Message);
 
-        return File(result.Data, "application/pdf", $"quiz-{quizId}.pdf");
+            return File(result.Data, "application/pdf", $"quiz-{quizId}.pdf");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to export quiz: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -87,11 +94,18 @@ public class QuizExportController : BaseController
                 return Forbid("You are not authorized to export this quiz");
         }
 
-        var result = await _quizExportService.ExportAsTextAsync(quizId, includeAnswers);
-        if (!result.Success)
-            return BadRequest(result.Message);
+        try
+        {
+            var result = await _quizExportService.ExportAsTextAsync(quizId, includeAnswers);
+            if (!result.Success)
+                return BadRequest(result.Message);
 
-        return File(result.Data, "text/plain", $"quiz-{quizId}.txt");
+            return File(result.Data, "text/plain", $"quiz-{quizId}.txt");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to export quiz: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -128,11 +142,18 @@ public class QuizExportController : BaseController
         if (!isAuthorized)
             return Forbid("You are not authorized to export this quiz attempt");
 
-        var result = await _quizExportService.ExportTryAsPdfAsync(attemptId);
-        if (!result.Success)
-            return BadRequest(result.Message);
+        try
+        {
+            var result = await _quizExportService.ExportTryAsPdfAsync(attemptId);
+            if (!result.Success)
+                return BadRequest(result.Message);
 
-        return File(result.Data, "application/pdf", $"quiz-{quizId}-attempt-{attemptId}.pdf");
+            return File(result.Data, "application/pdf", $"quiz-{quizId}-attempt-{attemptId}.pdf");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to export quiz attempt: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -169,10 +190,17 @@ public class QuizExportController : BaseController
         if (!isAuthorized)
             return Forbid("You are not authorized to export this quiz attempt");
 
-        var result = await _quizExportService.ExportTryAsTextAsync(attemptId);
-        if (!result.Success)
-            return BadRequest(result.Message);
+        try
+        {
+            var result = await _quizExportService.ExportTryAsTextAsync(attemptId);
+            if (!result.Success)
+                return BadRequest(result.Message);
 
-        return File(result.Data, "text/plain", $"quiz-{quizId}-attempt-{attemptId}.txt");
+            return File(result.Data, "text/plain", $"quiz-{quizId}-attempt-{attemptId}.txt");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to export quiz attempt: {ex.Message}");
+        }
     }
 } 
