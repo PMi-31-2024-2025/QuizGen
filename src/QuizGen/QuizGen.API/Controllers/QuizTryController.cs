@@ -24,27 +24,43 @@ public class QuizTryController : BaseController
         _quizService = quizService;
     }
 
-    [HttpPost("{quizId}/attempts")]
+    [HttpPost("{quizId}/start")]
     public async Task<IActionResult> StartQuizTry(int quizId)
     {
-        int currentUserId = GetCurrentUserId();
-        if (currentUserId == 0)
-            return Unauthorized("Invalid user credentials");
+        var userId = GetCurrentUserId();
+        if (userId == 0)
+        {
+            return Unauthorized();
+        }
 
-        // Verify quiz exists and user has access to it
         var quizResult = await _quizService.GetQuizByIdAsync(quizId);
         if (!quizResult.Success)
-            return NotFound("Quiz not found");
+        {
+            return NotFound(quizResult.Message);
+        }
 
-        // Verify the user owns the quiz or has permission to take it
-        if (!IsResourceOwner(quizResult.Data.AuthorId))
-            return Forbid("You are not authorized to take this quiz");
+        if (quizResult.Data.AuthorId == userId)
+        {
+            return Forbid();
+        }
 
-        var result = await _quizTryService.StartQuizTryAsync(quizId, currentUserId);
-        if (!result.Success)
-            return BadRequest(result.Message);
+        try
+        {
+            var result = await _quizTryService.StartQuizTryAsync(quizId, userId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
 
-        return CreatedAtAction(nameof(GetQuizTryDetails), new { quizId = quizId, attemptId = result.Data.Id }, result.Data);
+            return CreatedAtAction(
+                nameof(GetQuizTryDetails),
+                new { quizId = quizId, attemptId = result.Data.Id },
+                result.Data);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpGet("attempts")]
@@ -109,31 +125,35 @@ public class QuizTryController : BaseController
     }
 
     [HttpPost("{quizId}/attempts/{attemptId}/answers")]
-    public async Task<IActionResult> SubmitAnswer(int quizId, int attemptId, [FromBody] SubmitAnswerRequest request)
+    public async Task<IActionResult> SubmitAnswer(int quizId, int attemptId, SubmitAnswerRequest request)
     {
-        int currentUserId = GetCurrentUserId();
-        if (currentUserId == 0)
-            return Unauthorized("Invalid user credentials");
+        if (request == null || request.QuestionId <= 0 || request.AnswerId <= 0)
+        {
+            return BadRequest("Invalid question ID or answer ID");
+        }
 
-        // Verify that the attempt exists and belongs to the current user
-        var attemptResult = await _quizTryService.GetQuizTryDetailsAsync(attemptId);
-        if (!attemptResult.Success)
-            return NotFound("Quiz attempt not found");
-            
-        if (attemptResult.Data.UserId != currentUserId)
-            return Forbid("You are not authorized to submit answers for this quiz attempt");
-            
-        // Verify that the quiz ID matches the attempt's quiz ID
-        if (attemptResult.Data.QuizId != quizId)
-            return BadRequest("Quiz ID does not match the attempt's quiz ID");
+        var userId = GetCurrentUserId();
+        if (userId == 0)
+        {
+            return Unauthorized();
+        }
 
-        var result = await _quizAnswerService.CreateQuizAnswerAsync(
-            attemptId,
-            request.QuestionId,
-            request.AnswerId);
+        var quizTryResult = await _quizTryService.GetQuizTryDetailsAsync(attemptId);
+        if (!quizTryResult.Success)
+        {
+            return NotFound(quizTryResult.Message);
+        }
 
+        if (quizTryResult.Data.UserId != userId)
+        {
+            return Forbid();
+        }
+
+        var result = await _quizAnswerService.CreateQuizAnswerAsync(attemptId, request.QuestionId, request.AnswerId);
         if (!result.Success)
+        {
             return BadRequest(result.Message);
+        }
 
         return CreatedAtAction(
             nameof(GetQuizTryAnswers),
