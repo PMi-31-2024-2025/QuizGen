@@ -616,5 +616,251 @@ namespace QuizGen.Tests
             var returnedAnswers = Assert.IsAssignableFrom<IEnumerable<QuizAnswerDto>>(okResult.Value);
             Assert.Empty(returnedAnswers);
         }
+
+        [Fact]
+        public async Task GetQuizAttempts_NotAuthorized_ReturnsForbid()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var quiz = new QuizDto
+            {
+                Id = quizId,
+                AuthorId = 2,
+                Name = "Test Quiz",
+                AuthorName = "Other User"
+            };
+
+            var quizResult = new ServiceResult<QuizDto>
+            {
+                Success = true,
+                Data = quiz
+            };
+
+            _mockQuizService.Setup(s => s.GetQuizByIdAsync(quizId))
+                .Returns(Task.FromResult(quizResult));
+
+            // Act
+            var result = await _quizTryController.GetQuizAttempts(quizId);
+
+            // Assert
+            Assert.IsType<ForbidResult>(result);
+        }
+
+        [Fact]
+        public async Task GetQuizTryDetails_NotAuthorized_ReturnsForbid()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            var attemptId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var quizTryDetails = new QuizTryDetailsDto
+            {
+                Id = attemptId,
+                QuizId = quizId,
+                UserId = 2,
+                QuizName = "Test Quiz"
+            };
+
+            var result = new ServiceResult<QuizTryDetailsDto>
+            {
+                Success = true,
+                Data = quizTryDetails
+            };
+
+            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
+                .Returns(Task.FromResult(result));
+
+            // Act
+            var actionResult = await _quizTryController.GetQuizTryDetails(quizId, attemptId);
+
+            // Assert
+            Assert.IsType<ForbidResult>(actionResult);
+        }
+
+        [Fact]
+        public async Task SubmitAnswer_NotAuthorized_ReturnsForbid()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            var attemptId = 1;
+            var questionId = 1;
+            var answerId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var quizTryDetails = new QuizTryDetailsDto
+            {
+                Id = attemptId,
+                QuizId = quizId,
+                UserId = 2,
+                QuizName = "Test Quiz"
+            };
+
+            var attemptResult = new ServiceResult<QuizTryDetailsDto>
+            {
+                Success = true,
+                Data = quizTryDetails
+            };
+
+            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
+                .Returns(Task.FromResult(attemptResult));
+
+            var request = new SubmitAnswerRequest
+            {
+                QuestionId = questionId,
+                AnswerId = answerId
+            };
+
+            // Act
+            var result = await _quizTryController.SubmitAnswer(quizId, attemptId, request);
+
+            // Assert
+            Assert.IsType<ForbidResult>(result);
+        }
+
+        [Fact]
+        public async Task GetQuizTryAnswers_NotAuthorized_ReturnsForbid()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            var attemptId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var quizTryDetails = new QuizTryDetailsDto
+            {
+                Id = attemptId,
+                QuizId = quizId,
+                UserId = 2,
+                QuizName = "Test Quiz"
+            };
+
+            var attemptResult = new ServiceResult<QuizTryDetailsDto>
+            {
+                Success = true,
+                Data = quizTryDetails
+            };
+
+            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
+                .Returns(Task.FromResult(attemptResult));
+
+            // Act
+            var result = await _quizTryController.GetQuizTryAnswers(quizId, attemptId);
+
+            // Assert
+            Assert.IsType<ForbidResult>(result);
+        }
+
+        [Fact]
+        public async Task GetQuizAttempts_QuizNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var quizResult = new ServiceResult<QuizDto>
+            {
+                Success = false,
+                Message = "Quiz not found"
+            };
+
+            _mockQuizService.Setup(s => s.GetQuizByIdAsync(quizId))
+                .Returns(Task.FromResult(quizResult));
+
+            // Act
+            var result = await _quizTryController.GetQuizAttempts(quizId);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Quiz not found", notFoundResult.Value);
+        }
+
+        [Fact]
+        public async Task SubmitAnswer_ServiceThrowsException_ReturnsBadRequest()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            var attemptId = 1;
+            var questionId = 1;
+            var answerId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var quizTryDetails = new QuizTryDetailsDto
+            {
+                Id = attemptId,
+                QuizId = quizId,
+                UserId = userId,
+                QuizName = "Test Quiz"
+            };
+
+            var attemptResult = new ServiceResult<QuizTryDetailsDto>
+            {
+                Success = true,
+                Data = quizTryDetails
+            };
+
+            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
+                .Returns(Task.FromResult(attemptResult));
+
+            _mockQuizAnswerService.Setup(s => s.CreateQuizAnswerAsync(attemptId, questionId, answerId))
+                .Throws(new Exception("Failed to submit answer"));
+
+            var request = new SubmitAnswerRequest
+            {
+                QuestionId = questionId,
+                AnswerId = answerId
+            };
+
+            // Act
+            var result = await _quizTryController.SubmitAnswer(quizId, attemptId, request);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Failed to submit answer", badRequestResult.Value);
+        }
+
+        [Fact]
+        public async Task GetQuizTryAnswers_ServiceThrowsException_ReturnsBadRequest()
+        {
+            // Arrange
+            var userId = 1;
+            var quizId = 1;
+            var attemptId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var quizTryDetails = new QuizTryDetailsDto
+            {
+                Id = attemptId,
+                QuizId = quizId,
+                UserId = userId,
+                QuizName = "Test Quiz"
+            };
+
+            var attemptResult = new ServiceResult<QuizTryDetailsDto>
+            {
+                Success = true,
+                Data = quizTryDetails
+            };
+
+            _mockQuizTryService.Setup(s => s.GetQuizTryDetailsAsync(attemptId))
+                .Returns(Task.FromResult(attemptResult));
+
+            _mockQuizAnswerService.Setup(s => s.GetQuizAnswersByQuizTryAsync(attemptId))
+                .Throws(new Exception("Failed to get answers"));
+
+            // Act
+            var result = await _quizTryController.GetQuizTryAnswers(quizId, attemptId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Failed to get answers", badRequestResult.Value);
+        }
     }
 } 

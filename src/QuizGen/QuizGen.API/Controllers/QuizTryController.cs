@@ -63,16 +63,20 @@ public class QuizTryController : BaseController
         }
     }
 
-    [HttpGet("attempts")]
+    [HttpGet("my")]
     public async Task<IActionResult> GetMyQuizTries()
     {
-        int currentUserId = GetCurrentUserId();
-        if (currentUserId == 0)
-            return Unauthorized("Invalid user credentials");
+        var userId = GetCurrentUserId();
+        if (userId == 0)
+        {
+            return Unauthorized("User is not authenticated");
+        }
 
-        var result = await _quizTryService.GetQuizTriesByUserAsync(currentUserId);
+        var result = await _quizTryService.GetQuizTriesByUserAsync(userId);
         if (!result.Success)
+        {
             return BadRequest(result.Message);
+        }
 
         return Ok(result.Data);
     }
@@ -135,7 +139,7 @@ public class QuizTryController : BaseController
         var userId = GetCurrentUserId();
         if (userId == 0)
         {
-            return Unauthorized();
+            return Unauthorized("User is not authenticated");
         }
 
         var quizTryResult = await _quizTryService.GetQuizTryDetailsAsync(attemptId);
@@ -149,41 +153,58 @@ public class QuizTryController : BaseController
             return Forbid();
         }
 
-        var result = await _quizAnswerService.CreateQuizAnswerAsync(attemptId, request.QuestionId, request.AnswerId);
-        if (!result.Success)
+        try
         {
-            return BadRequest(result.Message);
-        }
+            var result = await _quizAnswerService.CreateQuizAnswerAsync(attemptId, request.QuestionId, request.AnswerId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
 
-        return CreatedAtAction(
-            nameof(GetQuizTryAnswers),
-            new { quizId = quizId, attemptId = attemptId },
-            result.Data);
+            return CreatedAtAction(
+                nameof(GetQuizTryAnswers),
+                new { quizId = quizId, attemptId = attemptId },
+                result.Data);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpGet("{quizId}/attempts/{attemptId}/answers")]
     public async Task<IActionResult> GetQuizTryAnswers(int quizId, int attemptId)
     {
-        int currentUserId = GetCurrentUserId();
-        if (currentUserId == 0)
-            return Unauthorized("Invalid user credentials");
+        var userId = GetCurrentUserId();
+        if (userId == 0)
+        {
+            return Unauthorized("User is not authenticated");
+        }
 
-        // Verify that the attempt exists and belongs to the current user
-        var attemptResult = await _quizTryService.GetQuizTryDetailsAsync(attemptId);
-        if (!attemptResult.Success)
-            return NotFound("Quiz attempt not found");
-            
-        if (attemptResult.Data.UserId != currentUserId)
-            return Forbid("You are not authorized to view answers for this quiz attempt");
-            
-        // Verify that the quiz ID matches the attempt's quiz ID
-        if (attemptResult.Data.QuizId != quizId)
-            return BadRequest("Quiz ID does not match the attempt's quiz ID");
+        var quizTryResult = await _quizTryService.GetQuizTryDetailsAsync(attemptId);
+        if (!quizTryResult.Success)
+        {
+            return NotFound(quizTryResult.Message);
+        }
 
-        var result = await _quizAnswerService.GetQuizAnswersByQuizTryAsync(attemptId);
-        if (!result.Success)
-            return BadRequest(result.Message);
+        if (quizTryResult.Data.UserId != userId)
+        {
+            return Forbid();
+        }
 
-        return Ok(result.Data);
+        try
+        {
+            var result = await _quizAnswerService.GetQuizAnswersByQuizTryAsync(attemptId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Data);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 } 
