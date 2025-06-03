@@ -262,6 +262,30 @@ namespace QuizGen.Tests
         }
 
         [Fact]
+        public async Task GetQuizzesByDifficulty_InvalidResponse_ReturnsBadRequest()
+        {
+            var userId = 1;
+            var difficulty = "another difficulty";
+            SetupAuthenticatedUser(userId);
+
+            var expectedResponse = new ServiceResult<IEnumerable<QuizDto>>
+            {
+                Success = false,
+                Message = "Invalid difficulty level provided"
+            };
+
+            _mockQuizService.Setup(s => s.GetQuizzesByDifficultyAsync(difficulty))
+                .Returns(Task.FromResult(expectedResponse));
+
+            
+            var result = await _quizController.GetQuizzesByDifficulty(difficulty);
+
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Invalid difficulty level provided", badRequestResult.Value);
+        }
+
+        [Fact]
         public async Task DeleteQuiz_ValidId_ReturnsNoContent()
         {
             // Arrange
@@ -315,6 +339,31 @@ namespace QuizGen.Tests
 
             // Assert
             Assert.IsType<ForbidResult>(result);
+        }
+
+        [Fact]
+        public async Task DeleteQuiz_QuizNotFound_ReturnsNotFound()
+        {
+       
+            var userId = 1;
+            var quizId = 1;
+            SetupAuthenticatedUser(userId);
+
+            var getQuizResponse = new ServiceResult<QuizDto>
+            {
+                Success = false,
+                Message = "Quiz not found"
+            };
+
+            _mockQuizService.Setup(s => s.GetQuizByIdAsync(quizId))
+                .Returns(Task.FromResult(getQuizResponse));
+
+        
+            var result = await _quizController.DeleteQuiz(quizId);
+
+          
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Quiz not found", notFoundResult.Value);
         }
     }
 } 
